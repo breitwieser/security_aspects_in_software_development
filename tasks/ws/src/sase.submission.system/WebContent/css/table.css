@@ -1,0 +1,117 @@
+@CHARSET "UTF-8";
+/**
+ * Contains css for table formatting.
+ * 
+ * In a production scenario it is a bad idea to use several css files, because
+ * it causes browsers to need more requests to load a page, but this practice
+ * reduces readability. For this reason we have split the css and the JavaScript
+ * code into several files. 
+ */
+.table_container {
+	float: left;
+	padding: 10px;
+}
+
+.table_heading {
+	margin-top: 0px;
+	font-size: 24px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+.table_head {
+	padding: 8px 10px 4px 10px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	text-align: center;
+	font-size: 18px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.table_yellow {
+	border: 1px solid #CCCCA3;
+}
+
+th.hidden {
+	display: none;
+}
+
+td.hidden {
+	display: none;
+}
+
+.table_body {
+	font-family: "Lucida Console", Monaco, monospace;
+}
+
+td {
+	padding: 4px 10px;
+	font-size: 14px;
+}
+
+.table_even {
+	
+}
+
+.table_odd {
+	
+}
+
+.table_head_yellow {
+	color: #000000;
+	background-color: #CCCCA3;
+}
+
+.table_td_yellow {
+	border-bottom: 1px solid #E6E6B8;
+}
+
+.table_even_yellow {
+	background: #FFFFFF;
+}
+
+.table_odd_yellow {
+	background: #F0F0D4;
+}
+
+.table_even_yellow:focus {
+	background-color: #FFFF99;
+}
+
+.table_odd_yellow:focus {
+	background-color: #FFFF99;
+}
+
+td.submission {
+	word-break: break-all;
+}
+
+div.nav_bar_container {
+	padding: 2px 10px;
+	background-color: #CCCCA3;
+}
+
+div.nav_bar {
+	float: left;
+	width: 25%;
+}
+
+div.nav_bar_left {
+	text-align: left;
+}
+
+div.nav_bar_center {
+	text-align: center;
+}
+
+div.nav_bar_right {
+	text-align: right;
+}
+
+span.nav_bar {
+	cursor: pointer;
+	font-weight: bolder;
+}

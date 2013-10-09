@@ -1,0 +1,335 @@
+@CHARSET "UTF-8";
+
+/*
+
+General classes used around the site.
+
+*/
+div.spacer {
+	clear: both;
+	height: 1px;
+}
+
+.cursor_pointer {
+	cursor: pointer;
+}
+
+div.kill_float {
+	clear: both;
+}
+
+div.hidden {
+	display: none;
+}
+
+div#container {
+	width: 100%;
+	position: relative;
+	background-color: #FFFFCC;
+}
+
+div.generic_container {
+	padding: 10px;
+	background-color: #FFFFCC;
+}
+
+div.next_to_menu_container {
+	padding: 10px;
+	position:relative;
+	margin-left: 192px;
+	
+}
+
+h1.heading {
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-size: 24px;
+}
+
+h2.heading {
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-size: 20px;
+}
+
+h3.heading {
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-size: 18px;
+}
+
+h1.next_to_menu {
+	margin-top: 0px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-size: 24px
+}
+
+p.description {
+	font-size: 14px;
+	padding-bottom: 6px;
+}
+
+p.description_yellow {
+	color: #404040;
+	border-bottom: solid 1px #CCCCA3;
+}
+
+/*
+
+Classes for the header tag
+
+*/
+#header {
+	position: relative;
+	z-index: 10;
+	width: 100%;
+	margin: 0 8px 0px 0px;
+	padding: 0px;
+	border-left: 1px solid #212121;
+	border-right: 1px solid #212121;
+	height: 64px;
+	font-weight: normal;
+	background-color: #212121;
+}
+
+#fuzzy_the_bug_div {
+	height: 64px;
+	width: 48px;
+	float: left;
+}
+
+#fuzzy_the_bug {
+	padding: 12px 4px 4px 4px;
+	width: 48;
+	height: 38;
+	opacity: 0.95;
+}
+
+#title_div {
+	width: 70%;
+	height: 64px;
+	float: left;
+}
+
+#title {
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-weight: bold;
+	font-size: 32px;
+	float: left;
+	padding: 0.45em 0em 0.50em 0.25em;
+}
+
+.title_text {
+	color: #FFF080;
+}
+
+#session_mngt_div {
+	float: right;
+	padding: 14px 18px 0px 0px;
+}
+
+#header_button {
+	font-size: 18px;
+	padding-left: 0.25em;
+	padding-right: 0.5em;
+}
+
+.button_icon {
+	position: relative;
+	top: 3px;
+	left: 2px;
+	width: 18px;
+	height: 18px;
+}
+
+.lbody {
+	position: relative;
+	float: left;
+	overflow: hidden;
+	font-family: Georgia, serif;
+	width: 100%;
+	height: 100%;
+	border: solid 1px #CCCCA3;
+	float: left;
+}
+
+/*
+
+Classes for the menu
+
+*/
+
+.menu {
+	float: left;
+	width: 172px;
+	padding: 10px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+.menu_entry {
+	margin: 2px 0px;
+	border: solid 1px #99997A;
+	padding: 2px 5px;
+	background: #E6E6B8;
+	width: 160px;
+	list-style-type: none;
+}
+
+.menu_entry_selected {
+	font-weight: bold;
+}
+
+.menu_entry:hover {
+	background-color: #FFF080;
+}
+
+.menu_entry_ref {
+	text-decoration: none;
+	display: block;
+}
+
+a.menu_entry_ref:link {
+	color: #111111;
+}
+
+a.menu_entry_ref:visited {
+	color: #111111;
+}
+
+a.menu_entry_ref:active {
+	color: #111111;
+}
+
+a.menu_entry_ref:hover {
+	color: #111111;
+}
+
+/*
+Styles for the slide in message overlay
+*/
+
+.comm_area {
+	position: absolute;
+	z-index: 5;
+	width: 100%;
+	margin: -36px 0px 0px 0px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	height: 24px;
+	color: #FFF080;
+	font-size: 16px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-weight: bold;
+	background-color: #414141;
+	opacity: 0.75;
+	border-left: 1px solid #414141;
+	border-right: 1px solid #414141;
+	transition: all 1s ease-out;
+}
+
+.comm_message {
+	float: left;
+	padding-left: 10px;
+	text-align: left;
+}
+
+.comm_close {
+	float: right;
+	margin-right: 5px;
+}
+
+.adventure_container {
+	position: relative;
+	width: 800px;
+	height: 100%;
+	/*height: 700px;*/
+}
+
+.adventure_picture {
+	float: left;
+	margin: 5px;
+	width: 200px;
+}
+
+img#fuzzys_adventure {
+	transition: all 1s ease-in-out;
+}
+
+.adventure_text_container {
+	width: 580px;
+	float: left;
+}
+
+input.adventure {
+	width: 580px;
+}
+
+span.shadow {
+	text-shadow: 0 1px 1px rgba(0, 0, 0, .3);
+}
+
+b.fuzzy_the_bug {
+	color: #e4a800;
+	text-shadow: 0 1px 1px rgba(0, 0, 0, .3);
+}
+
+p#adventure_text_field {
+	font-weight: bold;
+}
+
+div.error_picture {
+	float: left;
+	margin: 5px;
+	width: 200px;
+}
+
+div.error_description {
+	margin-left: 5px;
+}
+
+p.error_description {
+	font-size: 16px;
+	padding-bottom: 6px;
+}
+
+a.error_link {
+	color: #000000;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+/*
+
+Footer classes
+
+*/
+
+#footer {
+	height: 30px;
+	padding: 10px 0px;
+	width: 100%;
+	border-left: 1px solid #212121;
+	border-right: 1px solid #212121;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-size: 14px;
+	color: #FFF080;
+	background-color: #212121;
+}
+
+#footer_body {
+	padding-left: 10px;
+}
+
+span.disclaimer {
+	cursor: pointer;
+	font-weight: bold;
+}
+
+span.license {
+	cursor: pointer;
+	font-weight: bold;
+}
+
+a.footer {
+	cursor: pointer;
+	color: #FFF080;
+	text-decoration: none;
+	font-weight: bold;
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <Context>
+  
+  <Resource name="jdbc/sasesubsystem"
+    auth="Container"
+    type="javax.sql.DataSource"
+    maxActive="15" maxIdle="3"
+    username="root" password="sase"
+    driverClassName="org.mariadb.jdbc.Driver"
+    url="jdbc:mysql://localhost/sasesubsystem"/>
+
+  <Realm className="org.apache.catalina.realm.LockOutRealm" >
+    <Realm className="org.apache.catalina.realm.DataSourceRealm"
+      dataSourceName="jdbc/sasesubsystem" localDataSource="true"
+      userTable="UsersView" userNameCol="user_name" userCredCol="user_pass"
+      userRoleTable="UserRolesView" roleNameCol="role_name"/>
+  </Realm>
+      
+  </Context>

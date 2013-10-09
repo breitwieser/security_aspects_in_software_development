@@ -1,0 +1,55 @@
+@CHARSET "UTF-8";
+/**
+ * Contains CSS for the message overlay
+ * 
+ * In a production scenario it is a bad idea to use several css files, because
+ * it causes browsers to need more requests to load a page, but this practice
+ * reduces readability. For this reason we have split the css and the JavaScript
+ * code into several files. 
+ */
+div.trans_ovl {
+	z-index: 10;
+	opacity: 0.2;
+	width: 100%;
+	height: 100%;
+	top: 0px;
+	left: 0px;
+	height: 100%;
+}
+
+div.message_overlay {
+	border-radius: .5em;
+	padding: 10px;
+	z-index: 20;
+	overflow: hidden;
+	position: fixed;
+	top: 15%;
+	width: 70%;
+	height: 75%;
+	left: 15%;
+	color: #212121;
+	background-color: #FFFFCC;
+	border: solid 3px #CCCCA3;
+}
+
+p.overlay_description {
+	margin-bottom: 0px;
+}
+
+div.overlay_close {
+	float: right;
+	margin-right: 5px;
+	font-size: 16px;
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+	font-weight: bold;
+}
+
+div.overlay_head {
+	position: relative;
+	width: 100%;
+}
+
+div.overlay_body {
+	position: relative;
+	overflow: auto;
+}

@@ -1,0 +1,121 @@
+@CHARSET "UTF-8";
+/**
+ * Contains css for button formatting.
+ * 
+ * In a production scenario it is a bad idea to use several css files, because
+ * it causes browsers to need more requests to load a page, but this practice
+ * reduces readability. For this reason we have split the css and the JavaScript
+ * code into several files. 
+ */
+.mod_button {
+	text-align: center;
+	text-decoration: none;
+	display: block;
+	cursor: pointer;
+	text-shadow: 0 1px 1px rgba(0, 0, 0, .3);
+	border-radius: .5em;
+	padding-top: .25em;
+	padding-bottom: .40em;
+}
+
+.mod_button:active {
+	position: relative;
+	top: 1px;
+	box-shadow: none;
+}
+
+.round_button {
+	text-align: center;
+	text-decoration: none;
+	display: block;
+	cursor: pointer;
+	text-shadow: 0 1px 1px rgba(0, 0, 0, .3);
+	border-radius: 1em;
+	padding-left: 0.3em;
+	padding-right: 0.3em;
+	padding-bottom: 0.05em;
+}
+
+.round_button:active {
+	position: relative;
+	top: 1px;
+	box-shadow: none;
+}
+
+.mod_button_yellow {
+	color: #111111;
+	background-color: #FFF080;
+	box-shadow: 0px 1px 2px #FFF0B0;
+}
+
+.mod_button_yellow:hover {
+		background-color: #FFFFCC;
+}
+
+.mod_button_black {
+	color: #F0F0F0;
+	background-color: #202020;
+	box-shadow: 0px 1px 2px #000000;
+}
+
+.mod_button_black:hover {
+	background-color: #101010;
+}
+
+.mod_button_grey {
+	color: #FFF080;
+	background-color: #999999;
+	box-shadow: 0px 1px 2px #2E2E2E;
+}
+
+.mod_button_grey:hover {
+	background-color: #7A7A7A;
+}
+
+a.mod_button_yellow:link {
+	color: #111111;
+}
+
+a.mod_button_yellow:visited {
+	color: #111111;
+}
+
+a.mod_button_yellow:active {
+	color: #111111;
+}
+
+a.mod_button_yellow:hover {
+	color: #111111;
+}
+
+a.mod_button_black:link {
+	color: #FFFFFF;
+}
+
+a.mod_button_black:visited {
+	color: #FFFFFF;
+}
+
+a.mod_button_black:active {
+	color: #FFFFFF;
+}
+
+a.mod_button_black:hover {
+	color: #FFFFFF;
+}
+
+a.mod_button_grey:link {
+	color: #FFFFCC;
+}
+
+a.mod_button_grey:visited {
+	color: #FFFFCC;
+}
+
+a.mod_button_grey:active {
+	color: #FFFFCC;
+}
+
+a.mod_button_grey:hover {
+	color: #FFFFCC;
+}

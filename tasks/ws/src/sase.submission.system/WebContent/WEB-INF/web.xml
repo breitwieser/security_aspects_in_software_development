@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+  <display-name>SASE SUB SYSTEM</display-name>
+  <description>
+    The SASE Submission System is part of the SASE practical exercises 2013.
+  </description>
+  <icon>
+    <small-icon>icons/fuzzy-tiny.jpg</small-icon>
+    <large-icon>icons/fuzzy-small.jpg</large-icon>
+  </icon>
+  <resource-ref>
+    <description>
+      Resource reference used to talk to the sasesubsystem database resource 
+      defined in the META-INF/context.xml.
+    </description>
+    <res-ref-name>
+      jdbc/sasesubsystem
+    </res-ref-name>
+    <res-type>
+      javax.sql.DataSource
+    </res-type>
+  </resource-ref>
+  <session-config>
+    <session-timeout>30</session-timeout>
+    <cookie-config>
+      <http-only>true</http-only>
+    </cookie-config>
+  </session-config>
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+  <security-role>
+    <role-name>Student</role-name>
+  </security-role>
+  <security-role>
+    <role-name>Administrator</role-name>
+  </security-role>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>SaseSubmission</web-resource-name>
+      <url-pattern>/submission/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>Student</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>SaseAdmin</web-resource-name>
+      <url-pattern>/admin/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>Administrator</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <realm-name>SASE SUB SYSTEM Protected Area</realm-name>
+    <form-login-config>
+      <form-login-page>/login.jsp</form-login-page>
+      <form-error-page>/login-error.do</form-error-page>
+    </form-login-config>
+  </login-config>
+  <error-page>
+    <exception-type>java.lang.Throwable</exception-type>
+    <location>/error.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>404</error-code>
+    <location>/error404.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>403</error-code>
+    <location>/error403.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>400</error-code>
+    <location>/error400.jsp</location>
+  </error-page>
+  <error-page>
+    <error-code>500</error-code>
+    <location>/error500.jsp</location>
+  </error-page>
+  <context-param>
+    <param-name>log4jContextName</param-name>
+    <param-value>SaseSubSystem</param-value>
+  </context-param>
+</web-app>

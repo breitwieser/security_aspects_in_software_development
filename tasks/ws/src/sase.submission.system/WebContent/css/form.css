@@ -1,0 +1,100 @@
+@CHARSET "UTF-8";
+/**
+ * Contains css for form formatting.
+ * 
+ * In a production scenario it is a bad idea to use several css files, because
+ * it causes browsers to need more requests to load a page, but this practice
+ * reduces readability. For this reason we have split the css and the JavaScript
+ * code into several files. 
+ */
+.form_container {
+	padding: 10px;
+	font-family: Georgia, serif;
+}
+
+.form_label {
+	display: block;
+	font-size: 16px;
+	font-weight: bold;
+	text-align: right;
+	float: left;
+	margin: 6px 12px;
+}
+
+.form_input {
+	font-size: 16px;
+	float: left;
+	margin: 2px 0px 20px 10px;
+	padding: 4px 2px;
+}
+
+.form_error_description {
+	/*visibility: hidden;*/
+	color: red;
+	font-size: 10px;
+	float: left;
+	margin: 0px 10px;
+	padding: 5px 2px;
+	vertical-align: middle;
+}
+
+.form_button {
+	float: left;
+	margin-left: 10px;
+	margin-bottom: 10px;
+}
+
+.form_container_yellow {
+	background: #FFFFCC;
+	border: solid 2px #CCCCA3;
+}
+
+input.hidden {
+	display: none;
+}
+
+.login_form_button {
+	width: 100px;
+}
+
+.login_form_label {
+	width: 100px;
+}
+
+.login_form_input {
+	width: 240px;
+}
+
+.login_form_error_description {
+	width: 240px;
+}
+
+.signin_form_label {
+	width: 140px;
+}
+
+.signin_form_input {
+	width: 240px;
+}
+
+.signin_form_error_description {
+	width: 240px;
+}
+
+#signin_form_button {
+	width: 100px;
+}
+
+.submission_form_button {
+	font-size: 16px;
+	margin: 0px 0px 20px 0px;
+	width: 200px;
+}
+
+.submission_form_input {
+	width: 400px;
+}
+
+.submission_form_error_description {
+	width: 240px;
+}
