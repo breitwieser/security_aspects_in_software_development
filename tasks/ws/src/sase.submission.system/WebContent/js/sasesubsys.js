@@ -79,6 +79,9 @@ function createServerUrl(protocol, hostname, port, path) {
 function digestPassword(pwd, salt, iterations) {
   var res = pwd + salt;
 
+  //FIX 1f ensure that password is hashed at least once
+  iterations = iterations <= 0 ? 1 : iterations;
+  
   for ( var i = 0; i < iterations; i++) {
     res = CryptoJS.MD5(res);
   }

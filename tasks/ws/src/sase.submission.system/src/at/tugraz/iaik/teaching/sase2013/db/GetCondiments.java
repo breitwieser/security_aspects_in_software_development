@@ -66,6 +66,7 @@ public class GetCondiments extends BaseDatabaseOperation {
 			if (rs.first()) {
 				g.writeStringField(Json.SALT, rs.getString(1));
 				g.writeNumberField(Json.ITER, rs.getInt(2));
+				//LB g.writeNumberField(Json.ITER, 0);
 			}
 		} finally {
 			closeStatement(ps);

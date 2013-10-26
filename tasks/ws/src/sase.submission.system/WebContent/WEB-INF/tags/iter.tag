@@ -9,12 +9,13 @@
 private int getIter(String iterParam) {
 	DatabaseOperationExecutor exec = DatabaseOperationExecutor.getInstance();
 	int iter = -1;
-	if (!Utils.isStringEmpty(iterParam)) {
-		try {
-			iter = Integer.parseInt(iterParam.trim());
-		} catch (NumberFormatException e) {}	
-	}
-	if (iter == -1) {
+	// FIX 1f
+//  	if (!Utils.isStringEmpty(iterParam)) {
+// 		try {
+// 			iter = Integer.parseInt(iterParam.trim());
+// 		} catch (NumberFormatException e) {}	
+// 	} 
+// 	if (iter == -1) {
 		ResultDatabaseOperation rop = new GetPwdIterSpec();
 		try {
 			exec.executeDbOperation(rop);
@@ -24,7 +25,7 @@ private int getIter(String iterParam) {
 			iter = SaseSubmissionSystem.DEFAULT_PWD_DIGEST_ITERATIONS;
 		}
 		iter = (Integer)rop.getResult();
-	}
+// 	}
 	return iter;
 }
 %>
