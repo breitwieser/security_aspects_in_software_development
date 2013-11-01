@@ -138,7 +138,9 @@ public class RootController extends GenericController {
 			return;
 		}
 		String name = nameParam.trim();
-		if (!name.matches("\\w[\\p{Graph}\\s]*")) {
+		//Fix 2e
+		//if (!name.matches("\\w[\\p{Graph}\\s]*")) {
+		if (!name.matches("\\w[\\w\\s]*\\w")) {
 			Utils.dispatchCommunique(
 			    MessageFormat.format("{0} is not a valid user name!", name), request,
 			    response, SIGNIN);

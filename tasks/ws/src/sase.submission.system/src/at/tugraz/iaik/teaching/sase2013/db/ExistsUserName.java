@@ -37,9 +37,13 @@ public class ExistsUserName extends ResultDatabaseOperation {
 	@Override
 	public void perform(Connection con) throws SQLException {
 		log.entry();
-		PreparedStatement ps = con.prepareStatement(MessageFormat.format(
-		    "SELECT `name` FROM Users WHERE `name`=''{0}'';", name));
+		//PreparedStatement ps = con.prepareStatement(MessageFormat.format(
+		//    "SELECT `name` FROM Users WHERE `name`=''{0}'';", name));
+		//Fix 2e
+		PreparedStatement ps = con.prepareStatement("SELECT `name` FROM Users WHERE `name`=?;");
 		try {
+			//Fix 2e
+			ps.setString(1, name);
 			ps.execute();
 			ResultSet rs = ps.getResultSet();
 			String user = new String();
