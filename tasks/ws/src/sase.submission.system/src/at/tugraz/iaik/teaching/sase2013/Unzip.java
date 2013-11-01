@@ -90,7 +90,15 @@ public class Unzip {
 		ZipInputStream zin = new ZipInputStream(zippy.getInputStream());
 		try {
 			while ((entry = zin.getNextEntry()) != null) {
+				System.out.println(dir+"-"+entry.getName());
 				File f = new File(dir, entry.getName());
+				//FIX 3f
+				if(!Utils.isInsideDir(dir, f)){
+					jsonLog.log(MessageFormat.format(
+						    "Path traversal attack detected \"{0}\" here: \"{1}\".",
+						    entry.getName(), f.getAbsolutePath()));
+					continue;
+				}
 				if (entry.isDirectory()) {
 					jsonLog.log(MessageFormat.format(
 					    "Creating directory entry \"{0}\" here: \"{1}\".",
