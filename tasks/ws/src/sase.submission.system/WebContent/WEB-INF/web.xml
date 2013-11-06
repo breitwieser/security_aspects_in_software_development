@@ -44,7 +44,7 @@
       <role-name>Student</role-name>
     </auth-constraint>
     <user-data-constraint>
-      <transport-guarantee>NONE</transport-guarantee>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee><!-- FIX 5b -->
     </user-data-constraint>
   </security-constraint>
   <security-constraint>
@@ -56,7 +56,20 @@
       <role-name>Administrator</role-name>
     </auth-constraint>
     <user-data-constraint>
-      <transport-guarantee>NONE</transport-guarantee>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee><!-- FIX 5b -->
+    </user-data-constraint>
+  </security-constraint>
+  <!-- FIX 5b -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>SaseSignIn</web-resource-name>
+      <url-pattern>/signin.jsp</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>User</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
   </security-constraint>
   <login-config>
