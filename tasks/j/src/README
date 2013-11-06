@@ -1,0 +1,64 @@
+Configuring the project
+=======================
+
+NOTE: The directory 'examples/validation' contains certificates 
+used for the OSCP client and server to sign their data. 
+You should not have to touch this directory.
+
+There are several config files and sub-directories to configure
+the behaviour of this project.
+
+config.properties
+-----------------
+This is the main configuration file for the client-server task.
+Via this file you can:
+	
+	* change the path to certificates/keys
+	  The 'examples/testcerts' and 'examples/morecerts' directories
+	  provide you with different certificate chains to test your
+	  implementations.
+	  
+	* change the password used for the private keys
+	  The password is always the same ('sase'). You should not have
+	  to modify this, except you created own secret keys with different
+	  passwords. 
+	  
+	* select a different binary for signing and sending to the server
+	
+	* select a certificate/key pair for the client and the server
+	
+	* add the fingerprints of the roots to be trusted by the client
+	  and the server. (NOTE: you will have to change this, if you
+	  switch from 'testcerts' to 'morecerts' or any other certificate
+	  chain).
+	  
+known.server.certs
+------------------
+This file is used by the client to store the HMACs of the server
+certificates. It is generated and modified automatically, so there
+should be nothing to do for you.
+
+validator.properties
+--------------------
+This is the main configuration file for the protocolAnalysis task.
+Via this file you can:
+
+	* select a blackbox and channel class
+	
+	* run the program multiple times 
+	  If you set the 'validator.run.multiple' property to false, 
+	  only the first of the certificates will be checked.
+	  Change the order of these certificates, if you wish to use a different
+	  certificate in a single run.
+	  
+	* change the path to the certificates
+	  There's no need to do that, except you want to test with your own
+	  certificates.
+	  
+certificates.database
+---------------------
+This file is for use with the protocolAnalysis package. It contains
+the fingerprints of the certificates, that can be found in
+'examples/protocolAnalysis' and the status of each certificate. When
+executing the protocolAnalysis application, the blackbox class will look 
+up this file to determine, which status to return.

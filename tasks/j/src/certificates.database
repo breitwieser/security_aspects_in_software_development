@@ -1,0 +1,17 @@
+# This file contains the fingerprints and status of the given certificates
+# used by the check server to determine the status of a given certificate.
+
+# Good Cert 1
+836BE878328D456819C61F5A3FE5562A13B686C7=good
+
+#Good Cert 2
+BC51622453DD1A6CCC599560E5AE0659B5E11911=good
+
+#Good Cert 3
+5BC6A202643B8EF8BA945A6E562116A513F24099=good
+
+#Bad Cert 1
+A634D058876AAE2D54DB42368174FE833640AE29=revoked
+
+#Bad Cert 2
+1C5288CD74E84C9718A091384FAA798051D66F31=revoked

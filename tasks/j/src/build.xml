@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<project basedir="." default="build" name="j">
+  
+  <property environment="env"/>
+
+  <path id="j.classpath">
+    <pathelement location="bin"/>
+    <pathelement location="libs/iaik_jce_full.jar"/>
+    <pathelement location="libs/junit.jar" />
+  	<pathelement location="libs/blackbox.jar" />
+  </path>
+
+  <target name="init">
+    <mkdir dir="bin"/>
+    <copy includeemptydirs="false" todir="bin">
+      <fileset dir="src">
+        <exclude name="**/*.java"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="clean">
+    <delete dir="bin"/>
+  </target>
+
+  <target depends="init" name="build">
+    <echo message="${ant.project.name}: ${ant.file}"/>
+    <javac destdir="bin" includeantruntime="false" source="1.7" target="1.7">
+      <src path="src"/>
+      <classpath refid="j.classpath"/>
+    </javac>
+  </target>
+
+  <target depends="build" name="run-client">
+    <java classname="at.iaik.teaching.sase.ku2013.client.Client" failonerror="true" fork="yes">
+      <classpath refid="j.classpath"/>
+      <arg value="config.properties" />
+    </java>
+  </target>
+
+  <target depends="build" name="run-validator">
+    <java classname="at.iaik.teaching.sase.ku2013.protocolAnalysis.Validator" failonerror="true" fork="yes">
+      <classpath refid="j.classpath"/>
+    </java>
+  </target>
+
+  <target depends="build" name="junit">
+    <junit printsummary="yes" haltonfailure="no" showoutput="no">
+      <classpath refid="j.classpath" />
+      <!--<formatter type="plain" usefile="false"/>-->
+      <batchtest todir="junit_output">
+        <fileset dir="src">
+          <include name="**/*Tests*.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+</project>
