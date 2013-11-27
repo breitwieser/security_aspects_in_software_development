@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Build notes for KLEE (on the reference virtual machine)
+# The reference virtual machine already comes with a pre-packaged version
+# of LLVM 3.0 (llvm-3.0, llvm-3.0-dev). Unfortunately the Debian way of
+# packaging LLVM does not exactly match the expectations of KLEE's configure
+# script ...
+#
+# ... we can however sort the problems out with a few symlink hacks (in step 2)
+
+set -x
+
+### Step 0: Install the prerequisite packages
+sudo apt-get install g++ curl dejagnu subversion bison flex bc llvm-3.0-dev
+sudo apt-get install binutils-gold
+sudo apt-get remove llvm-gcc-4.6
+sudo apt-get install libz-dev
+
+### Step 1: Setup the directories and fetch the sources
+
+mkdir -p $HOME/tools/build
+svn co -r 1673 https://svn.code.sf.net/p/stp-fast-prover/code/trunk/stp/ $HOME/tools/build/stp
+git clone https://github.com/ccadar/klee.git $HOME/tools/build/klee
+
+### Step 2: Prepare the "fake" LLVM build directory
+
+mkdir -p $HOME/tools/llvm $HOME/tools/llvm/lib
+ln -s /usr/lib/llvm-3.0/build/* $HOME/tools/llvm/
+ln -s /usr/lib/llvm-3.0/bin     $HOME/tools/llvm/
+ln -s /usr/lib/llvm-3.0/include $HOME/tools/llvm/
+ln -s /usr/lib/i386-linux-gnu/libLLVM* $HOME/tools/llvm/lib/
+ln -s $HOME/tools/llvm          $HOME/tools/llvm/Release
+
+### Build and install STP (the SMT solver required by Klee)
+
+cd $HOME/tools/build/stp
+./scripts/configure --with-prefix=$HOME/tools
+make
+make install
+
+### Build and install KLEE
+
+cd $HOME/tools/build/klee
+./configure --prefix=$HOME/tools --with-llvm=$HOME/tools/llvm --with-stp=$HOME/tools
+make
+
+# NOTE: We need KEEP_SYMBOLS=1 to prevent the makefile from trying to strip the
+# ktest-tool script (which actually is a python script ...)
+make KEEP_SYMBOLS=1 install

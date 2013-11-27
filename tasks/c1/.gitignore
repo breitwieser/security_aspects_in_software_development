@@ -1,0 +1,9 @@
+# LLVM bitcode
+*.bc
+
+# Scans produced by Clang's static analyzer
+/_scans
+
+# Coverage data produced by gcov/lcov
+/coverage.info
+/_cov

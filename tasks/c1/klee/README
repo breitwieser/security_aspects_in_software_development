@@ -1,0 +1,21 @@
+This directory contains all files required for the testing tasks
+with LLVM's KLEE tool.
+
+Content:
+  Makefile - Makefile for building the bitcode programs and running
+             KLEE (invoke with "make" or "make help" to see available
+             targets)
+
+ install.txt - Installation instructions for KLEE (can be executed
+               as shell script on the reference VM).
+
+
+ urldecode.c - A simple demo program demonstrating how KLEE can be
+               used for testing of programs.
+
+ offbyone.c  - Simple C program with a classic strcpy/strcat buffer
+               overflow.
+
+               Assignment: Extend "main" such that the buffer overflow
+               can be automatically detected when running KLEE on the
+               compiled bitcode program.
