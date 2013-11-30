@@ -22,6 +22,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 import javax.crypto.SecretKey;
 
@@ -139,14 +140,25 @@ public class CryptoTests {
     byte[] iv = getRandomBytes(13);
     byte[] plaintext = TXT_HELLO_WORLD.getBytes(CHARSET_UTF8);
 
+    try
+    {
+    	
+//    System.out.println("aesRandomKey");
+//    System.out.println(Arrays.toString(plaintext));
+    
     // Encrypt once
     byte[] ciphertext = aesCcmEncrypt(plaintext, 0, plaintext.length, key, iv);
 
+//    System.out.println(Arrays.toString(ciphertext));
+    
     // Decrypt once
     byte[] decrypted = aesCcmDecrypt(ciphertext, 0, ciphertext.length, key, iv);
 
+//    System.out.println(Arrays.toString(decrypted));
+    
     // And check
     Assert.assertArrayEquals(plaintext, decrypted);
+    }catch(Exception e){e.printStackTrace();}
   }
 
   @Test
