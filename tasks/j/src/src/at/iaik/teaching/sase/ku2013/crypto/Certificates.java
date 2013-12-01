@@ -1,6 +1,9 @@
 package at.iaik.teaching.sase.ku2013.crypto;
 
 import iaik.x509.X509Certificate;
+import iaik.x509.extensions.BasicConstraints;
+import iaik.x509.extensions.ExtendedKeyUsage;
+import iaik.x509.extensions.KeyUsage;
 import iaik.x509.ocsp.CertStatus;
 import iaik.x509.ocsp.SingleResponse;
 
@@ -246,7 +249,6 @@ public class Certificates {
     // certification.
 
     ArrayList<X509Certificate[]> chains = new ArrayList<X509Certificate[]>();
-
     // ----- BEGIN STUDENT CODE -----
     // NOTE: Dummy implementation to allow use with simple chains without cross-certification ...
     chains.add(getUniqueChain(leaf));
@@ -315,9 +317,9 @@ public class Certificates {
 
     if (!(status_response.getCertStatus().getCertStatus() == CertStatus.GOOD)) {
       System.err.println("OCSP server returned, that certificate was revoked");
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**
@@ -340,11 +342,74 @@ public class Certificates {
 
     // TODO: Implement certificate chain validation and usage checks.
 
-    // ----BEGIN STUDENT CODE----
-    if (true) {
-      throw new UnsupportedOperationException("Please implement this operation.");
-    }
-    // ----END STUDENT CODE----
+	  X509Certificate root = chain[chain.length-1];
+	  // 1) root is trusted
+	  if(!isTrusted(root))
+		  throw new CertificateException("Certificate Root untrusted");
+	  int lastcaindex = chain.length-2;
+	  for(int i = 0; i < chain.length; i++)
+	  {
+		  try
+		  {
+			  // 2) each has a valid signature
+			  if(i < (chain.length-1))
+				  chain[i].verify(chain[i+1].getPublicKey());
+			  // 3) each valid at current time
+			  chain[i].checkValidity();
+			  // 4) BasicConstraints present and marked critical
+			  //* CA: must be PRESENT and CRITICAL
+			  //* LEAF: must be PRESENT (may be critical)
+			  if(chain[i].getExtension(BasicConstraints.oid) == null)
+				  throw new CertificateException("BasicConstraints not present");
+			  BasicConstraints basic = (BasicConstraints)chain[i].getExtension(BasicConstraints.oid);
+			  if(i != 0 && !basic.ca())
+				  throw new CertificateException("Non CA in chain detected");
+				  
+			  if(basic.ca())
+			  {
+				  if(!basic.isCritical())
+					  throw new CertificateException("CA, but BasicConstraints not marked as critical");
+				  // 5) BasicConstraints extension properly reflects the usage as CA or non-CA certificate.
+				  // ??
+				  // 6) Check the path length constraints found in BasicConstraints for CA certificates.
+				  int pathlenconstraint = basic.getPathLenConstraint();
+				  if(pathlenconstraint != -1)
+				  {
+					  System.err.println(pathlenconstraint + "<" + (lastcaindex-i));
+					  /*if(pathlenconstraint < (lastcaindex-i))
+					  	throw new CertificateException("Path length constraints violated");	*/
+				  }
+			  }
+			  // 7) KeyUsage extension is present and matches the intended key usage. 
+			  // See the TODOs in the  IntendedUsage enumeration class for more details.
+			  if(chain[i].getExtension(KeyUsage.oid) == null)
+				  throw new CertificateException("KeyUsage not present");
+			  KeyUsage keyusage = (KeyUsage)chain[i].getExtension(KeyUsage.oid);
+			  if(!intended_usage.isAllowedBy(basic, keyusage))
+				  throw new CertificateException("KeyUsage doesn't match intended key usage");
+			  // 8) No unhandled critical certificate extensions are present in any of the certificates. 
+			  // The only allowed critical extensions are BasicConstraints, KeyUsage and ExtendedKeyUsage. 
+			  // The ExtendedKeyUsage extension may be missing.
+			  if(chain[i].hasUnsupportedCriticalExtension())
+				  throw new CertificateException("Unsupported Critical Extension found");
+			  Set<?> criticalexts = chain[i].getCriticalExtensionOIDs();
+			  if(!criticalexts.remove(BasicConstraints.oid.getID())) // gets already checked before, but do it any way
+				  throw new CertificateException("BasicConstraints not Critical");
+			  if(!criticalexts.remove(KeyUsage.oid.getID()))
+				  throw new CertificateException("KeyUsage not Critical");
+			  criticalexts.remove(ExtendedKeyUsage.oid.getID());
+			  if(!criticalexts.isEmpty())
+				  throw new CertificateException("To much Critical extensions");
+			  // 9) No certificate in the chain has been revoked. 
+			  // Use the Certificates.isRevoked method to invoke the OCSPMiniClient for performing this check.
+			  if(isRevoked(chain[i]))
+				  throw new CertificateException("Certificate revoked");
+		  } catch(Exception e)
+		  {
+			  e.printStackTrace();
+			  throw new CertificateException(e.getMessage());
+		  }
+	  }
   }
 
   /**
