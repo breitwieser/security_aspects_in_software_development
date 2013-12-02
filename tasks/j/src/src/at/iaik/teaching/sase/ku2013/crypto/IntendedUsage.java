@@ -66,8 +66,8 @@ public enum IntendedUsage {
       // used to transport symmetric session keys. (key encipherment)
       if(basic == null || usage == null)
       	  return false;
-      //return true;
-      // TODO fix me
+      if(basic.ca())
+    	  return true;
       return usage.isSet(KeyUsage.keyEncipherment);
     }
   };

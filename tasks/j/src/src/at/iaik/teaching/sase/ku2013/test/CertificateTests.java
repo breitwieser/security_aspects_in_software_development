@@ -12,6 +12,7 @@ import iaik.x509.extensions.BasicConstraints;
 import iaik.x509.extensions.KeyUsage;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.security.cert.CertificateException;
 
 import org.junit.Before;
@@ -315,6 +316,63 @@ public class CertificateTests {
 
     // The leaf certificate is a CA certificate
     assertSame(raw_certs[0], certs.use(fingerprints[0], IntendedUsage.WRAP_KEY));
+  }
+  
+  @Test
+  public void testVerifySimple2() throws Exception {
+	FileInputStream in = new FileInputStream("examples/multipath/Leaf_1.p7b");
+	PKCS7CertList bundle = new PKCS7CertList(in);
+	X509Certificate[] raw_certs = bundle.getCertificateList();
+    Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
+    
+
+    // Prepare the finger-prints
+    for (int n = 0; n < raw_certs.length; ++n) {
+      fingerprints[n] = new Fingerprint(raw_certs[n]);
+    }
+// 	  0) Root 2 CA
+//    1) Intermediate 2 CA
+//    2) Leaf
+//    3) Root 1 CA
+//    4) Intermediate 1 CA
+//    5) Leaf
+// Tree:
+//    0			3
+//     \	   /
+//		1	  4
+//		 \   /
+//		 2 = 5
+    
+    // Create a new certificate table and add our certificates
+    Certificates certs = new Certificates();
+
+    // Mark the root certificate as trusted (The certificate is not
+    // yet in the table.)
+    // hardcoded
+    certs.addTrusted(fingerprints[0]); // Root 2 CA
+    certs.addTrusted(fingerprints[3]); // Root 1 CA
+    // Populate the certificate table with our test certificates
+    for (X509Certificate cert : raw_certs) {
+      certs.add(cert);
+    }
+
+    assertTrue(certs.isTrusted(fingerprints[0])); // Root 2 CA
+    assertTrue(certs.isTrusted(fingerprints[3])); // Root 1 CA
+
+    // The non-leaf certificates are CA certificates
+    for (int n = 0; n < raw_certs.length; ++n) {
+    	if(n != 2 && n != 5)
+    	{
+	      X509Certificate cert = certs.use(fingerprints[n], IntendedUsage.CA);
+	
+	      // Must be the same object
+	      assertSame(raw_certs[n], cert);
+    	}
+    }
+
+    // The leaf certificate is a CA certificate
+    assertSame(raw_certs[2], certs.use(fingerprints[2], IntendedUsage.WRAP_KEY));
+    assertSame(raw_certs[5], certs.use(fingerprints[5], IntendedUsage.WRAP_KEY));
   }
 
   @Test
