@@ -251,7 +251,32 @@ public class Certificates {
     ArrayList<X509Certificate[]> chains = new ArrayList<X509Certificate[]>();
     // ----- BEGIN STUDENT CODE -----
     // NOTE: Dummy implementation to allow use with simple chains without cross-certification ...
+    
+//    System.out.println(cha)
+    //algorithm
+    //start with leaf
+    //get issuer id
+    
+    
+    
+    System.out.println("############################################");
+    System.out.println("############################################");
+    System.out.println("leaf: " + leaf);
+    System.out.println(leaf.getIssuerDN());
+    
+    System.out.println("############################################");
+    
     chains.add(getUniqueChain(leaf));
+    
+    X509Certificate[] chain = chains.get(0);
+    for(X509Certificate cert: chain)
+    {
+    	System.out.println("subject: " + cert.getSubjectDN());
+    	System.out.println("issuer: " + cert.getIssuerDN());
+    	System.out.println("");
+    }
+    
+    System.out.println("############################################");
 
     // ----- END STUDENT CODE -----
 
