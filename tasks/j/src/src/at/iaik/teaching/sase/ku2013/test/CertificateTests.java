@@ -374,7 +374,63 @@ public class CertificateTests {
     assertSame(raw_certs[2], certs.use(fingerprints[2], IntendedUsage.WRAP_KEY));
     assertSame(raw_certs[5], certs.use(fingerprints[5], IntendedUsage.WRAP_KEY));
   }
+  
+  @Test
+  public void testVerifySimple3() throws Exception {
+	FileInputStream in = new FileInputStream("examples/multipath/Loop.p7b");
+	PKCS7CertList bundle = new PKCS7CertList(in);
+	X509Certificate[] raw_certs = bundle.getCertificateList();
+    Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
+    
 
+    // Prepare the finger-prints
+    for (int n = 0; n < raw_certs.length; ++n) {
+      fingerprints[n] = new Fingerprint(raw_certs[n]);
+    }
+// 	  0) Root 1 CA
+//    1) Leaf
+//    2) Intermediate 1 CA
+//    3) Intermediate 2 CA
+//    4) Root 1 CA
+// Tree:
+//   4=0 <- 3
+//     \   /
+//		 2  
+//		 |
+//		 1
+    
+    // Create a new certificate table and add our certificates
+    Certificates certs = new Certificates();
+
+    // Mark the root certificate as trusted (The certificate is not
+    // yet in the table.)
+    // hardcoded
+    certs.addTrusted(fingerprints[0]); // Root 1 CA
+    certs.addTrusted(fingerprints[4]); // Root 1 CA
+    // Populate the certificate table with our test certificates
+    for (X509Certificate cert : raw_certs) {
+      certs.add(cert);
+    }
+
+    assertTrue(certs.isTrusted(fingerprints[0])); // Root 1 CA
+    assertTrue(certs.isTrusted(fingerprints[4])); // Root 1 CA
+
+    // The non-leaf certificates are CA certificates
+    for (int n = 0; n < raw_certs.length; ++n) {
+    	if(n != 1)
+    	{
+	      X509Certificate cert = certs.use(fingerprints[n], IntendedUsage.CA);
+	
+	      // Must be the same object
+	      assertSame(raw_certs[n], cert);
+    	}
+    }
+
+    // The leaf certificate is a CA certificate
+    assertSame(raw_certs[1], certs.use(fingerprints[1], IntendedUsage.WRAP_KEY));
+  }
+  
+  
   @Test
   public void testVerifyErrors() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
