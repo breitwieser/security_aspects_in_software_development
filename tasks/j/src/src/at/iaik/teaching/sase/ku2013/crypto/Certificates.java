@@ -371,7 +371,6 @@ public class Certificates {
 	  // 1) root is trusted
 	  if(!isTrusted(root))
 		  throw new CertificateException("Certificate Root untrusted");
-	  int lastcaindex = chain.length-2;
 	  for(int i = 0; i < chain.length; i++)
 	  {
 		  try
@@ -400,9 +399,8 @@ public class Certificates {
 				  int pathlenconstraint = basic.getPathLenConstraint();
 				  if(pathlenconstraint != -1)
 				  {
-					  System.err.println(pathlenconstraint + "<" + (lastcaindex-i));
-					  /*if(pathlenconstraint < (lastcaindex-i))
-					  	throw new CertificateException("Path length constraints violated");	*/
+					  if(pathlenconstraint < (i-1))
+					  	throw new CertificateException("Path length constraints violated");
 				  }
 			  }
 			  // 7) KeyUsage extension is present and matches the intended key usage. 
@@ -418,10 +416,11 @@ public class Certificates {
 			  if(chain[i].hasUnsupportedCriticalExtension())
 				  throw new CertificateException("Unsupported Critical Extension found");
 			  Set<?> criticalexts = chain[i].getCriticalExtensionOIDs();
-			  if(!criticalexts.remove(BasicConstraints.oid.getID())) // gets already checked before, but do it any way
-				  throw new CertificateException("BasicConstraints not Critical");
+			  criticalexts.remove(BasicConstraints.oid.getID());
 			  if(!criticalexts.remove(KeyUsage.oid.getID()))
-				  throw new CertificateException("KeyUsage not Critical");
+				  System.out.println("KeyUsage not Critical");
+			  // TODO: should throw exception??
+			//	  throw new CertificateException("KeyUsage not Critical");
 			  criticalexts.remove(ExtendedKeyUsage.oid.getID());
 			  if(!criticalexts.isEmpty())
 				  throw new CertificateException("To much Critical extensions");
@@ -431,7 +430,7 @@ public class Certificates {
 				  throw new CertificateException("Certificate revoked");
 		  } catch(Exception e)
 		  {
-			  e.printStackTrace();
+			  //e.printStackTrace();
 			  throw new CertificateException(e.getMessage());
 		  }
 	  }
