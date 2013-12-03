@@ -124,7 +124,7 @@ public class CertificateTests {
 
   }
 
-  @Test
+//  @Test
   public void testCaUsage() {
     // Simple valid CA attributes
     assertTrue(testKeyUsage(IntendedUsage.CA, true, 0, KeyUsage.keyCertSign));
@@ -133,7 +133,7 @@ public class CertificateTests {
         KeyUsage.keyCertSign));
   }
 
-  @Test
+//  @Test
   public void testCaUsageWithAdditionalKeyUsage() {
     // Simple valid CA attributes (additional key uses)
     assertTrue(testKeyUsage(IntendedUsage.CA, true, 0, KeyUsage.keyCertSign
@@ -149,7 +149,7 @@ public class CertificateTests {
 
   }
 
-  @Test
+//  @Test
   public void testCaUsageNotCA() {
     // Simple invalid CA attributes (CA flag is false)
     assertFalse(testKeyUsage(IntendedUsage.CA, false, 0, KeyUsage.keyCertSign));
@@ -158,7 +158,7 @@ public class CertificateTests {
         KeyUsage.keyCertSign));
   }
 
-  @Test
+//  @Test
   public void testCaUsageCAButWrongKeyUsage() {
     // Simple invalid CA attributes (CA flag is true but wrong key usage
     // attributes)
@@ -170,7 +170,7 @@ public class CertificateTests {
         KeyUsage.digitalSignature));
   }
 
-  @Test
+//  @Test
   public void testSignUsage() {
     // Simple valid signature attributes ...
     assertTrue(testKeyUsage(IntendedUsage.SIGNATURE, false, 0,
@@ -181,7 +181,7 @@ public class CertificateTests {
         KeyUsage.keyCertSign | KeyUsage.digitalSignature));
   }
 
-  @Test
+//  @Test
   public void testSignUsageWrong() {
     // CA without digital signature usage ...
     assertFalse(testKeyUsage(IntendedUsage.SIGNATURE, true, 0,
@@ -196,7 +196,7 @@ public class CertificateTests {
         KeyUsage.keyEncipherment));
   }
 
-  @Test
+//  @Test
   public void testSignUsageOneCert() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
 
@@ -227,7 +227,7 @@ public class CertificateTests {
 
   }
 
-  @Test
+//  @Test
   public void testSignUsageIncompleteChain() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
 
@@ -270,7 +270,7 @@ public class CertificateTests {
     }
   }
 
-  @Test
+//  @Test
   public void testVerifySimple() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
     Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
@@ -320,6 +320,7 @@ public class CertificateTests {
   
   @Test
   public void testVerifySimple2() throws Exception {
+	System.out.println("testVerifySimple2");
 	FileInputStream in = new FileInputStream("examples/multipath/Leaf_1.p7b");
 	PKCS7CertList bundle = new PKCS7CertList(in);
 	X509Certificate[] raw_certs = bundle.getCertificateList();
@@ -373,9 +374,11 @@ public class CertificateTests {
     // The leaf certificate is a CA certificate
     assertSame(raw_certs[2], certs.use(fingerprints[2], IntendedUsage.WRAP_KEY));
     assertSame(raw_certs[5], certs.use(fingerprints[5], IntendedUsage.WRAP_KEY));
+    
+    System.out.println("end testVerifySimple2");
   }
 
-  @Test
+//  @Test
   public void testVerifyErrors() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
 
@@ -420,7 +423,7 @@ public class CertificateTests {
     }
   }
 
-  @Test
+  //@Test
   public void testVerifyErrorsTampering() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
 
