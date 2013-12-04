@@ -1,6 +1,7 @@
 package at.iaik.teaching.sase.ku2013.crypto;
 
 import iaik.x509.X509Certificate;
+import iaik.x509.X509ExtensionInitException;
 import iaik.x509.extensions.BasicConstraints;
 import iaik.x509.extensions.ExtendedKeyUsage;
 import iaik.x509.extensions.KeyUsage;
@@ -566,13 +567,30 @@ public class Certificates {
 
     // TODO: Implement certificate chain validation and usage checks.
 
+	  X509Certificate leaf = chain[0];
 	  X509Certificate root = chain[chain.length-1];
 	  // 1) root is trusted
 	  try {
-      root.verify();
-    } catch (Exception e1) {
-      throw new CertificateException("Root certificate not valid");
-    }
+		  root.verify();
+	  } catch (Exception e1) {
+	      throw new CertificateException("Root certificate not valid");
+	  }
+
+	  try {
+		  // 7) KeyUsage extension is present and matches the intended key usage. 
+		  // See the TODOs in the  IntendedUsage enumeration class for more details.
+		  if(leaf.getExtension(KeyUsage.oid) == null)
+			  throw new CertificateException("KeyUsage not present");
+		  if(leaf.getExtension(BasicConstraints.oid) == null)
+			  throw new CertificateException("BasicConstraints not present");
+		  BasicConstraints leafbasic = (BasicConstraints)leaf.getExtension(BasicConstraints.oid);
+		  KeyUsage keyusage = (KeyUsage)leaf.getExtension(KeyUsage.oid);
+		  if(!intended_usage.isAllowedBy(leafbasic, keyusage))
+			  throw new CertificateException("KeyUsage doesn't match intended key usage");
+	  } catch (X509ExtensionInitException e) {
+	      throw new CertificateException(e.getMessage());
+	  }
+	  
 	  if(!isTrusted(root))
 		  throw new CertificateException("Certificate Root untrusted");
 	  for(int i = 0; i < chain.length; i++)
@@ -607,13 +625,7 @@ public class Certificates {
 					  	throw new CertificateException("Path length constraints violated");
 				  }
 			  }
-			  // 7) KeyUsage extension is present and matches the intended key usage. 
-			  // See the TODOs in the  IntendedUsage enumeration class for more details.
-			  if(chain[i].getExtension(KeyUsage.oid) == null)
-				  throw new CertificateException("KeyUsage not present");
-			  KeyUsage keyusage = (KeyUsage)chain[i].getExtension(KeyUsage.oid);
-			  if(!intended_usage.isAllowedBy(basic, keyusage))
-				  throw new CertificateException("KeyUsage doesn't match intended key usage");
+			  
 			  // 8) No unhandled critical certificate extensions are present in any of the certificates. 
 			  // The only allowed critical extensions are BasicConstraints, KeyUsage and ExtendedKeyUsage. 
 			  // The ExtendedKeyUsage extension may be missing.
