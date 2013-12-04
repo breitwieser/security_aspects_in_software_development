@@ -52,6 +52,8 @@ public enum IntendedUsage {
     	
 	  if(basic == null || usage == null)
 		  return false;
+      if(basic.ca())
+    	  return true;
       return usage.isSet(KeyUsage.digitalSignature);
     }
   },
