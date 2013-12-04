@@ -1192,8 +1192,8 @@ public final class CryptoToolBox {
 		// ----BEGIN STUDENT CODE----
 		Signature signer = Signature.getInstance(SIG_ALG_RSA_SIG_SHA1, IAIK_PROVIDER);
 		signer.initVerify(pubkey);
-//		signer.update(signed_blob);
-		verified = signer.verify(signed_blob);
+		signer.update(data_bytes);
+		verified = signer.verify(sig_bytes);
 		// ----END STUDENT CODE----
 
 		if (!verified) {

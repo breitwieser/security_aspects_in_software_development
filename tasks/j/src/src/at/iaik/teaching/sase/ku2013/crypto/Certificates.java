@@ -259,11 +259,11 @@ public class Certificates {
     ArrayList<X509Certificate[]> chains = new ArrayList<X509Certificate[]>();
     // ----- BEGIN STUDENT CODE -----
 //    try{chains.add(getUniqueChain(leaf));}catch(Exception e){e.printStackTrace();}
-//    chains.add(getUniqueChain(leaf));
-//    System.out.println("########result");
-//    for(X509Certificate c:chains.get(0)) System.out.println(c.getSubjectDN());
-//    if(true)
-//      return chains;
+    chains.add(getUniqueChain(leaf));
+    System.out.println("########result");
+    for(X509Certificate c:chains.get(0)) System.out.println(c.getSubjectDN());
+    if(true)
+      return chains;
     
     // NOTE: Dummy implementation to allow use with simple chains without cross-certification ...
     System.out.println("############################################");
@@ -397,7 +397,6 @@ public class Certificates {
       } catch (Exception e) {
         // invalid
         System.out.println("  INVALID - chain: " + System.identityHashCode(current_chain));
-        // current_chain = chainz.pop();
         current_chain = null;
         continue;
       }
@@ -413,6 +412,20 @@ public class Certificates {
         // add to finished chains; Last element is duplicate of root ca due to
         // self signed certificate check
         List<X509Certificate> sublist = current_chain.subList(0, current_chain.size() - 1);
+        
+        //element at pos 0 has to be leaf -> exchange leaf cert. and check validity
+        sublist.set(0, leaf);
+        if(sublist.size() > 1)
+        {
+          try{ 
+            leaf.verify(sublist.get(1).getPublicKey());
+          } catch (Exception e){
+            System.out.println("  INVALID - leaf swap not successful - chain: " + System.identityHashCode(current_chain));
+            current_chain = null;
+            continue;
+          }
+        }
+        
         chains.add(sublist.toArray(new X509Certificate[sublist.size()]));
         current_chain = null;
         continue;
@@ -621,7 +634,7 @@ public class Certificates {
 				  throw new CertificateException("Certificate revoked");
 		  } catch(Exception e)
 		  {
-			  //e.printStackTrace();
+			  e.printStackTrace();
 			  throw new CertificateException(e.getMessage());
 		  }
 	  }
