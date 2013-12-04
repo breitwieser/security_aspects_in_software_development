@@ -639,14 +639,14 @@ public class CertificateTests {
 //      System.out.println("  public key: "+n+" - "+raw_certs[n].getPublicKey());
     }
     
-    X509Certificate ca2 = raw_certs[0];
-    X509Certificate cab_2 = raw_certs[1];
-    X509Certificate caa_2 = raw_certs[2];
-    X509Certificate cax_2 = raw_certs[3];
-    X509Certificate ca1 = raw_certs[4];
-    X509Certificate caa_1 = raw_certs[5];
-    X509Certificate cab_1 = raw_certs[6];
-    X509Certificate cax_1 = raw_certs[7];
+//    X509Certificate ca2 = raw_certs[0];
+//    X509Certificate cab_2 = raw_certs[1];
+//    X509Certificate caa_2 = raw_certs[2];
+//    X509Certificate cax_2 = raw_certs[3];
+//    X509Certificate ca1 = raw_certs[4];
+//    X509Certificate caa_1 = raw_certs[5];
+//    X509Certificate cab_1 = raw_certs[6];
+//    X509Certificate cax_1 = raw_certs[7];
 
 //    cax_1.verify(caa_1.getPublicKey());
 //    cax_1.verify(caa_2.getPublicKey());
@@ -696,6 +696,72 @@ public class CertificateTests {
     assertTrue(chain.length == 4);
     indices = new int[]{3,2,1,0};
     for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+
+    // The leaf certificate is a CA certificate
+//    assertSame(raw_certs[1], certs.use(fingerprints[1], IntendedUsage.WRAP_KEY));
+    }catch(Exception e){e.printStackTrace();assertTrue(false);}
+  }
+  
+  @Test
+  public void testCrossCert4() throws Exception{
+    try{
+    System.out.println("testCrossCert4");
+    FileInputStream in = new FileInputStream("examples/multipath/cross_certification_advanced.p7b");
+    PKCS7CertList bundle = new PKCS7CertList(in);
+    X509Certificate[] raw_certs = bundle.getCertificateList();
+    Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
+
+    // Prepare the finger-prints
+    for (int n = 0; n < raw_certs.length; ++n) {
+      fingerprints[n] = new Fingerprint(raw_certs[n]);
+      System.out.println("subject at idx: "+n+" - "+raw_certs[n].getSubjectDN());
+      System.out.println("  issuer at idx: "+n+" - "+raw_certs[n].getIssuerDN());
+//      System.out.println("  public key: "+n+" - "+raw_certs[n].getPublicKey());
+    }
+    
+    // Create a new certificate table and add our certificates
+    Certificates certs = new Certificates();
+
+    // Mark the root certificate as trusted (The certificate is not
+    // yet in the table.)
+    // hardcoded
+//    certs.addTrusted(fingerprints[0]); // Root 1 CA
+//    certs.addTrusted(fingerprints[4]); // Root 1 CA
+    // Populate the certificate table with our test certificates
+    for (X509Certificate cert : raw_certs) {
+      certs.add(cert);
+    }
+
+//    assertTrue(certs.isTrusted(fingerprints[0])); // CA-2
+//    assertTrue(certs.isTrusted(fingerprints[4])); // CA-1
+
+    List<X509Certificate[]> chains = certs.getChains(raw_certs[8]);
+    assertTrue(chains.size()==4);
+    
+    //Chain 0
+    X509Certificate[] chain = chains.get(0);
+    int[] indices = {8,7,6};
+    assertTrue(chain.length == indices.length);
+    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+    //Chain 1
+    chain = chains.get(1);
+    indices = new int[]{8,7,6,4,3};
+    assertTrue(chain.length == indices.length);
+//    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+    //Chain 2
+    chain = chains.get(2);
+    indices = new int[]{8,7,6,4};
+    assertTrue(chain.length == indices.length);
+//    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+    //Chain 3
+    chain = chains.get(3);
+    indices = new int[]{8,7,6,4,0};
+    assertTrue(chain.length == indices.length);
+//    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
     
 
     // The leaf certificate is a CA certificate

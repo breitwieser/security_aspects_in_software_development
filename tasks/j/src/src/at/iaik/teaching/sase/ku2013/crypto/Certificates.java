@@ -618,12 +618,13 @@ public class Certificates {
 				  // 5) BasicConstraints extension properly reflects the usage as CA or non-CA certificate.
 				  // ??
 				  // 6) Check the path length constraints found in BasicConstraints for CA certificates.
-				  int pathlenconstraint = basic.getPathLenConstraint();
-				  if(pathlenconstraint != -1)
-				  {
-					  if(pathlenconstraint < (i-1))
-					  	throw new CertificateException("Path length constraints violated");
-				  }
+				  //Path length constrain checs removed due to posting of Thomas Kastner
+//				  int pathlenconstraint = basic.getPathLenConstraint();
+//				  if(pathlenconstraint != -1)
+//				  {
+//					  if(pathlenconstraint < (i-1))
+//					  	throw new CertificateException("Path length constraints violated");
+//				  }
 			  }
 			  
 			  // 8) No unhandled critical certificate extensions are present in any of the certificates. 
