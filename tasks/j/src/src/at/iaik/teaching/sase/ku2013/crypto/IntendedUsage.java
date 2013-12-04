@@ -52,8 +52,6 @@ public enum IntendedUsage {
     	
 	  if(basic == null || usage == null)
 		  return false;
-      if(basic.ca())
-    	  return true;
       return usage.isSet(KeyUsage.digitalSignature);
     }
   },
@@ -68,8 +66,6 @@ public enum IntendedUsage {
       // used to transport symmetric session keys. (key encipherment)
       if(basic == null || usage == null)
       	  return false;
-      if(basic.ca())
-    	  return true;
       return usage.isSet(KeyUsage.keyEncipherment);
     }
   };
