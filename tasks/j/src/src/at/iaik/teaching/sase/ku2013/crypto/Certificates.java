@@ -11,7 +11,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Principal;
+import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -255,227 +258,210 @@ public class Certificates {
 
     ArrayList<X509Certificate[]> chains = new ArrayList<X509Certificate[]>();
     // ----- BEGIN STUDENT CODE -----
+//    try{chains.add(getUniqueChain(leaf));}catch(Exception e){e.printStackTrace();}
+//    chains.add(getUniqueChain(leaf));
+//    System.out.println("########result");
+//    for(X509Certificate c:chains.get(0)) System.out.println(c.getSubjectDN());
+//    if(true)
+//      return chains;
+    
     // NOTE: Dummy implementation to allow use with simple chains without cross-certification ...
-    try{
-      System.out.println("############################################");
-      System.out.println("############################################");
-      System.out.println("leaf:\n" + leaf);
-      System.out.println(leaf.getIssuerDN().getName());
+    System.out.println("############################################");
+    System.out.println("############################################");
+    System.out.println("leaf: " + leaf.getSubjectDN());
+    System.out.println(" ");
+
+    // This list holds all certificates for a given subject identifier
+    Map<Principal, Vector<X509Certificate>> adjacency_list = new HashMap<Principal, Vector<X509Certificate>>();
+    // build adjacency_list
+    for (X509Certificate cert : certs.values()) {
+      Principal key = cert.getSubjectDN();
+      System.out.println(key);
+      if (!adjacency_list.containsKey(key)) {
+        Vector<X509Certificate> vec = new Vector<X509Certificate>();
+        vec.add(cert);
+        adjacency_list.put(cert.getSubjectDN(), vec);
+      } else {
+        adjacency_list.get(key).add(cert);
+      }
+    }
+
+    System.out.println("############################################");
+
+    System.out.println("--------------------------------------------");
+
+    // holds all chains that have to be processed
+    Stack<Vector<X509Certificate>> chainz = new Stack<Vector<X509Certificate>>();
+    Vector<X509Certificate> current_chain = new Vector<X509Certificate>();
+
+    X509Certificate cert, issuer;
+
+    // create initial chains
+    Vector<X509Certificate> tmp = adjacency_list.get(leaf.getSubjectDN());
+    if(tmp == null)
+      return chains;
+    
+    for (int i = tmp.size() - 1; i >= 0; i--) {
+      X509Certificate child = tmp.get(i);
+      Vector<X509Certificate> tmp_chain;
+      if (i > 0) {
+        // fork -> dublicate chain
+        tmp_chain = new Vector<X509Certificate>(current_chain);
+        chainz.push(tmp_chain);
+        System.out.println("new chain created - id: " + System.identityHashCode(chainz.size()));
+      } else {
+        tmp_chain = current_chain;
+      }
+      tmp_chain.add(child);
+    }
+
+    boolean skip_fork = false;
+    System.out.println("start");
+
+    // Depth first search
+    // algorithm basic principle (depth first approach):
+    // fork - process
+    // fork: for each known issuer, copy current chain, add issuer, and push it
+    // on the stack for later processing
+    // process: for the current chain and the last element do all checks like:
+    // have we already found a root ca, ...
+    //
+    // if a new chain is selected as current_chain, skip the fork step, because
+    // the last element on it hasn't been processed
+    while (chainz.size() != 0 || current_chain != null) {
       System.out.println(" ");
+      System.out.println("----");
 
-      Map<Principal, Vector<X509Certificate>> map_subj_certs = new HashMap<Principal, Vector<X509Certificate>>();
-      for (X509Certificate cert : certs.values()) {
-        Principal key = cert.getSubjectDN();
-        if (!map_subj_certs.containsKey(key)) {
-          System.out.println("subject seen for the first time");
-          Vector<X509Certificate> vec = new Vector<X509Certificate>();
-          vec.add(cert);
-          map_subj_certs.put(cert.getSubjectDN(), vec);
+      if (current_chain == null) {
+        current_chain = chainz.pop();
+        skip_fork = current_chain.size() == 1 ? false : true;
+        System.out.println("use new chain (" + System.identityHashCode(current_chain) + ")");
+      }
+
+      cert = current_chain.lastElement();
+      System.out.println("subject: " + cert.getSubjectDN() + " - issuer: " + cert.getIssuerDN());
+      System.out
+          .println("current chain (" + System.identityHashCode(current_chain) + "): " + printChain(current_chain));
+
+      // fork
+      if (!skip_fork) {
+        // if cert is a root CA - stop adding issuers (it may be the case that
+        // an ICA issues a certificate for a CA)
+        if (cert.getSubjectDN().equals(cert.getIssuerDN())) {
+          current_chain.add(cert);
         } else {
-          System.out.println("subject already exists: vector size" + map_subj_certs.get(key).size());
-          map_subj_certs.get(key).add(cert);
-          System.out.println("new vector size: " + map_subj_certs.get(key).size());
-        }
-        // map_subj_certs.put(cert.getSubjectDN(), cert);
-        System.out.println("subject: " + cert.getSubjectDN().getName());
-        System.out.println("issuer: " + cert.getIssuerDN().getName());
-        System.out.println(" ");
-      }
-
-      System.out.println("############################################");
-
-      // chains.add(getUniqueChain(leaf));
-
-      System.out.println("--------------------------------------------");
-
-      // Map<Integer, Vector<X509Certificate>> chainz = new HashMap<Integer,
-      // Vector<X509Certificate>>();
-      Stack<Vector<X509Certificate>> chainz = new Stack<Vector<X509Certificate>>();
-      Vector<X509Certificate> current_chain = new Vector<X509Certificate>();
-      // chainz.push(current_chain);
-
-      X509Certificate cert, issuer;
-
-//      Stack<X509Certificate> stack = new Stack<X509Certificate>();
-
-      Vector<X509Certificate> tmp = map_subj_certs.get(leaf.getSubjectDN());
-      for (int i = tmp.size() - 1; i >= 0; i--) {
-        X509Certificate child = tmp.get(i);
-        Vector<X509Certificate> tmp_chain;
-        if (i > 0) {
-          // fork -> dublicate chain
-          tmp_chain = new Vector<X509Certificate>(current_chain);
-          chainz.push(tmp_chain);
-          System.out.println("new chain created - id: " + System.identityHashCode(chainz.size()));
-        }
-        else{
-          tmp_chain = current_chain;
-        }
-        tmp_chain.add(child);
-      }
-      
-//      for (int i = 0; i < tmp.size(); i++) {
-//        if (i > 0) {
-//          // fork -> dublicate chain
-//          Vector<X509Certificate> copy = new Vector<X509Certificate>(current_chain);
-//          copy.add(tmp.get(i));
-//          
-//        }
-//      }
-
-      boolean skip_fork = false;
-      System.out.println("start");
-
-      
-      // Depth first search
-      while (chainz.size() != 0 || current_chain != null) {
-        System.out.println(" ");
-        System.out.println("----");
-
-        if (current_chain == null) {
-          current_chain = chainz.pop();
-          skip_fork = current_chain.size() == 1 ? false : true;
-          System.out.println("use new chain (" + System.identityHashCode(current_chain) + ")");
-        }
-        
-        cert = current_chain.lastElement();
-        Principal p_subject = cert.getSubjectDN();
-        Principal p_issuer = cert.getIssuerDN();
-        System.out.println("subject: " + cert.getSubjectDN().getName() + " - issuer: " + cert.getIssuerDN().getName());
-        System.out.println("current chain (" + System.identityHashCode(current_chain) + "): "
-            + printChain(current_chain));
-//        System.out.println("stack size: "+stack.size());
-
-        
-        // fork
-        if (!skip_fork) {
-          Vector<X509Certificate> issuers = map_subj_certs.get(p_issuer);
+          Vector<X509Certificate> issuers = adjacency_list.get(cert.getIssuerDN());
+          //didn't find issuer
+          if(issuers == null)
+          {
+            //TODO throw exception?
+            current_chain = null;
+            continue;
+          }
           for (int i = issuers.size() - 1; i >= 0; i--) {
             X509Certificate child = issuers.get(i);
             Vector<X509Certificate> tmp_chain;
             if (i > 0) {
               // fork -> dublicate chain
               tmp_chain = new Vector<X509Certificate>(current_chain);
-            }
-            else{
+            } else {
               tmp_chain = current_chain;
             }
-            
+
             // add to chain
             tmp_chain.add(child);
-            if(tmp_chain != current_chain){
+            if (tmp_chain != current_chain) {
               chainz.push(tmp_chain);
               System.out.println("new chain created (" + System.identityHashCode(tmp_chain) + ") - dublicate of ("
                   + System.identityHashCode(current_chain) + ") - " + printChain(tmp_chain));
-            }else System.out.println(">>added to current_chain: "+child.getSubjectDN());
-//            if (!current_chain.contains(child)) {
-//              tmp_chain.add(child);
-//              if(tmp_chain != current_chain){
-//                chainz.push(tmp_chain);
-//                System.out.println("new chain created (" + System.identityHashCode(tmp_chain) + ") - dublicate of ("
-//                    + System.identityHashCode(current_chain) + ") - " + printChain(tmp_chain));
-//              }else System.out.println(">>added to current_chain: "+child.getSubjectDN());
-//            } else {
-//              // LOOP
-//              System.out.println("found LOOP");
-//              if(tmp_chain == current_chain){
-//                current_chain = null;
-//                continue;
-//              }
-//            }
+            } else
+              System.out.println(">>added to current_chain: " + child.getSubjectDN());
           }
         }
-        skip_fork = false;
-        
-//        if(current_chain == null)
-//          continue;
-        
-        System.out.println("current_chain size "+current_chain.size());
-        issuer = current_chain.lastElement();
-        cert = current_chain.get(current_chain.size()-2);
-        System.out.println("subject: " + cert.getSubjectDN().getName() + " - issuer: " + issuer.getSubjectDN().getName());
-        
-        // checks
-        if (issuer == null || !p_issuer.equals(issuer.getSubjectDN())) {
-          System.out.println("No valid issuer found");
-        }
-        // is cert signed by issuer?
-        try {
-          System.out.println("Verify that "+issuer.getSubjectDN()+" signed for " + cert.getSubjectDN());
-          cert.verify(issuer.getPublicKey());
-          // valid
-        } catch (Exception e) {
-          // invalid
-          System.out.println("  INVALID - chain: " + System.identityHashCode(current_chain));
-          // current_chain = chainz.pop();
-          current_chain = null;
-          continue;
-        }
+      }
+      skip_fork = false;
 
-        // is cert a self signed certificate?
-        // that would mean that it is a root certificate
-        if (p_subject.equals(p_issuer)) // TODO check if trusted root
-                                        // certificate
-        {
-          System.out.println("Self signed root certificate found");
-          // chain finished -> update current_chain
-          System.out.println("FINISHED chain (" + System.identityHashCode(current_chain) + "): "
-              + printChain(current_chain));
-          // add to finished chains; Last element is duplicate of root ca due to self signed certificate check
-          List<X509Certificate> sublist = current_chain.subList(0, current_chain.size()-1);
-          chains.add(sublist.toArray(new X509Certificate[sublist.size()]));
-          // if(chainz.size() == 0) break;//TODO remove
-          // current_chain = chainz.pop();
-          current_chain = null;
-          continue;
-        }
+      issuer = current_chain.lastElement();
+      cert = current_chain.get(current_chain.size() - 2);
+      System.out.println("subject: " + cert.getSubjectDN().getName() + " - issuer: " + issuer.getSubjectDN().getName());
 
-        //loop detection
-        List<X509Certificate> sublist = current_chain.subList(0, current_chain.size()-1);
-        System.out.println("current_chain size: "+current_chain.size()+" - sublist size: "+sublist.size());
-        if (sublist.contains(issuer)) {
-          // LOOP
-          System.out.println("found LOOP");
-          current_chain = null;
-          continue;
-        }
-        
+      // checks
+      if (issuer == null || !cert.getIssuerDN().equals(issuer.getSubjectDN())) {
+        System.out.println("No valid issuer found");
+      }
+      // is cert signed by issuer?
+      try {
+        System.out.println("Verify that " + issuer.getSubjectDN() + " signed for " + cert.getSubjectDN());
+        cert.verify(issuer.getPublicKey());
+        // valid
+      } catch (Exception e) {
+        // invalid
+        System.out.println("  INVALID - chain: " + System.identityHashCode(current_chain));
+        // current_chain = chainz.pop();
+        current_chain = null;
+        continue;
       }
 
-      // System.out.println(cha)
-      // algorithm
-      // start with leaf
-      System.out.println("\n\nresult:");
-      for (int i = 0; i < chains.size(); i++) {
-        X509Certificate[] chain = chains.get(i);
-        System.out.println("chain idx: " + i);
-        for (X509Certificate c : chain) {
-          System.out.println(c.getSubjectDN().getName());
-        }
-        System.out.println(" ");
+      // is cert a self signed certificate?
+      // that would mean that it is a root certificate
+      if (cert.getSubjectDN().equals(issuer.getSubjectDN()))
+      {
+        System.out.println("Self signed root certificate found");
+        // chain finished -> update current_chain
+        System.out.println("FINISHED chain (" + System.identityHashCode(current_chain) + "): "
+            + printChain(current_chain));
+        // add to finished chains; Last element is duplicate of root ca due to
+        // self signed certificate check
+        List<X509Certificate> sublist = current_chain.subList(0, current_chain.size() - 1);
+        chains.add(sublist.toArray(new X509Certificate[sublist.size()]));
+        current_chain = null;
+        continue;
       }
+
+      // loop detection
+      List<X509Certificate> sublist = current_chain.subList(0, current_chain.size() - 1);
+      boolean contained = false;
+      for (X509Certificate c : adjacency_list.get(issuer.getSubjectDN())) {
+        if (sublist.contains(c))
+          contained = true;
+      }
+      if (contained) {
+        // if (sublist.contains(issuer)) {
+        // LOOP
+        System.out.println("found LOOP");
+        current_chain = null;
+        continue;
+      }
+
+    }
+
+    // print results
+    System.out.println("  ");
+    System.out.println("result:");
+    for (int i = 0; i < chains.size(); i++) {
+      X509Certificate[] chain = chains.get(i);
+      System.out.println("chain idx: " + i);
+      for (X509Certificate c : chain) {
+        System.out.println(c.getSubjectDN().getName());
+      }
+      System.out.println(" ");
+    }
     
-    
-  //get issuer id
-    }catch(Exception e){e.printStackTrace();}
+    if(chains.size() == 0)
+    {
+      throw new CertificateException("No valid chain found");
+    }
     // ----- END STUDENT CODE -----
 
     return chains;
   }
 
-  private boolean isValid(X509Certificate cert, X509Certificate issuer)
-  {
-    try {
-      System.out.println("Verify that "+issuer.getSubjectDN()+" signed for " + cert.getSubjectDN());
-      cert.verify(issuer.getPublicKey());
-      // valid
-      return true;
-    } catch (Exception e) {
-      // invalid
-      return false;
-    }
-  }
-  
+  /**
+   * Returns a string of concatenated Subject identifier that are currently in the chain
+   * "subject1, subject2, ..., subjectN, " 
+   * @param chain
+   * @return 
+   */
   private String printChain(Vector<X509Certificate> chain)
   {
     StringBuilder s = new StringBuilder();
@@ -569,6 +555,11 @@ public class Certificates {
 
 	  X509Certificate root = chain[chain.length-1];
 	  // 1) root is trusted
+	  try {
+      root.verify();
+    } catch (Exception e1) {
+      throw new CertificateException("Root certificate not valid");
+    }
 	  if(!isTrusted(root))
 		  throw new CertificateException("Certificate Root untrusted");
 	  for(int i = 0; i < chain.length; i++)
@@ -617,10 +608,10 @@ public class Certificates {
 				  throw new CertificateException("Unsupported Critical Extension found");
 			  Set<?> criticalexts = chain[i].getCriticalExtensionOIDs();
 			  criticalexts.remove(BasicConstraints.oid.getID());
-			  if(!criticalexts.remove(KeyUsage.oid.getID()))
-				  System.out.println("KeyUsage not Critical");
-			  // TODO: should throw exception??
-			//	  throw new CertificateException("KeyUsage not Critical");
+			  boolean removed = criticalexts.remove(KeyUsage.oid.getID());
+			  if(basic.ca() && !removed){
+				  throw new CertificateException("KeyUsage not Critical");
+			  }
 			  criticalexts.remove(ExtendedKeyUsage.oid.getID());
 			  if(!criticalexts.isEmpty())
 				  throw new CertificateException("To much Critical extensions");

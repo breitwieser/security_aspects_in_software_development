@@ -121,11 +121,12 @@ public class CertificateTests {
   private static boolean testKeyUsage(IntendedUsage usage, boolean is_ca,
       int path_len, int key_usage) {
     BasicConstraints basic = new BasicConstraints(is_ca, path_len);
+    basic.setCritical(true); //patch
     return usage.isAllowedBy(basic, new KeyUsage(key_usage));
 
   }
 
-//  @Test
+@Test
   public void testCaUsage() {
     // Simple valid CA attributes
     assertTrue(testKeyUsage(IntendedUsage.CA, true, 0, KeyUsage.keyCertSign));
@@ -134,7 +135,7 @@ public class CertificateTests {
         KeyUsage.keyCertSign));
   }
 
-//  @Test
+@Test
   public void testCaUsageWithAdditionalKeyUsage() {
     // Simple valid CA attributes (additional key uses)
     assertTrue(testKeyUsage(IntendedUsage.CA, true, 0, KeyUsage.keyCertSign
@@ -150,7 +151,7 @@ public class CertificateTests {
 
   }
 
-//  @Test
+@Test
   public void testCaUsageNotCA() {
     // Simple invalid CA attributes (CA flag is false)
     assertFalse(testKeyUsage(IntendedUsage.CA, false, 0, KeyUsage.keyCertSign));
@@ -159,7 +160,7 @@ public class CertificateTests {
         KeyUsage.keyCertSign));
   }
 
-//  @Test
+@Test
   public void testCaUsageCAButWrongKeyUsage() {
     // Simple invalid CA attributes (CA flag is true but wrong key usage
     // attributes)
@@ -171,7 +172,7 @@ public class CertificateTests {
         KeyUsage.digitalSignature));
   }
 
-//  @Test
+@Test
   public void testSignUsage() {
     // Simple valid signature attributes ...
     assertTrue(testKeyUsage(IntendedUsage.SIGNATURE, false, 0,
@@ -182,7 +183,7 @@ public class CertificateTests {
         KeyUsage.keyCertSign | KeyUsage.digitalSignature));
   }
 
-//  @Test
+@Test
   public void testSignUsageWrong() {
     // CA without digital signature usage ...
     assertFalse(testKeyUsage(IntendedUsage.SIGNATURE, true, 0,
@@ -197,7 +198,7 @@ public class CertificateTests {
         KeyUsage.keyEncipherment));
   }
 
-//  @Test
+@Test
   public void testSignUsageOneCert() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
 
@@ -228,7 +229,7 @@ public class CertificateTests {
 
   }
 
-//  @Test
+@Test
   public void testSignUsageIncompleteChain() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
 
@@ -271,7 +272,7 @@ public class CertificateTests {
     }
   }
 
-//  @Test
+@Test
   public void testVerifySimple() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
     Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
@@ -319,7 +320,7 @@ public class CertificateTests {
     assertSame(raw_certs[0], certs.use(fingerprints[0], IntendedUsage.WRAP_KEY));
   }
   
-//  @Test
+//@Test
   public void testVerifySimple2() throws Exception {
 	System.out.println("testVerifySimple2");
 	FileInputStream in = new FileInputStream("examples/multipath/Leaf_1.p7b");
@@ -379,7 +380,7 @@ public class CertificateTests {
     System.out.println("end testVerifySimple2");
   }
   
-//  @Test
+//@Test
   public void testVerifySimple3() throws Exception {
 	FileInputStream in = new FileInputStream("examples/multipath/Loop.p7b");
 	PKCS7CertList bundle = new PKCS7CertList(in);
@@ -434,7 +435,7 @@ public class CertificateTests {
     assertSame(raw_certs[1], certs.use(fingerprints[1], IntendedUsage.WRAP_KEY));
   }
   
-//  @Test
+@Test
   public void testCrossCert1() throws Exception{
     try{
     System.out.println("testCrossCert1");
@@ -469,38 +470,26 @@ public class CertificateTests {
     // Mark the root certificate as trusted (The certificate is not
     // yet in the table.)
     // hardcoded
-    certs.addTrusted(fingerprints[0]); // Root 1 CA
+    certs.addTrusted(fingerprints[0]); // Root 2 CA
     certs.addTrusted(fingerprints[3]); // Root 1 CA
     // Populate the certificate table with our test certificates
     for (X509Certificate cert : raw_certs) {
       certs.add(cert);
     }
 
-    assertTrue(certs.isTrusted(fingerprints[0])); // CA-2
-    assertTrue(certs.isTrusted(fingerprints[3])); // CA-1
+    assertTrue(certs.isTrusted(fingerprints[0])); // Root 2 CA
+    assertTrue(certs.isTrusted(fingerprints[3])); // Root 1 CA
 
-    // The non-leaf certificates are CA certificates
-//    for (int n = 0; n < raw_certs.length; ++n) {
-//      if (n != 1) {
-//         cert = certs.use(fingerprints[n], IntendedUsage.CA);
-//
-//        // Must be the same object
-//        assertSame(raw_certs[n], cert);
-//      }
-//    }
-
-    //
-    
     List<X509Certificate[]> chains = certs.getChains(raw_certs[2]);
     assertTrue(chains.size()==2);
     
-    //Chain 0
-    X509Certificate[] chain = chains.get(0);
+    //Chain 1
+    X509Certificate[] chain = chains.get(1);
     assertTrue(chain.length == 3);
     int[] indices = {2, 1, 0};
     for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
     
-    //Chain 1
+    //Chain 0
     chain = chains.get(0);
     assertTrue(chain.length == 3);
     indices = new int[]{5, 4, 3};
@@ -510,7 +499,7 @@ public class CertificateTests {
     }catch(Exception e){e.printStackTrace();assertTrue(false);}
   }
   
-  @Test
+@Test
   public void testCrossCert2() throws Exception{
 //  0) Root 1 CA
 //  1) Leaf
@@ -545,51 +534,30 @@ public class CertificateTests {
     // yet in the table.)
     // hardcoded
     certs.addTrusted(fingerprints[0]); // Root 1 CA
-    certs.addTrusted(fingerprints[4]); // Root 1 CA
     // Populate the certificate table with our test certificates
     for (X509Certificate cert : raw_certs) {
       certs.add(cert);
     }
 
     assertTrue(certs.isTrusted(fingerprints[0])); // CA-2
-    assertTrue(certs.isTrusted(fingerprints[4])); // CA-1
 
-    // The non-leaf certificates are CA certificates
-//    for (int n = 0; n < raw_certs.length; ++n) {
-//      if (n != 1) {
-//         cert = certs.use(fingerprints[n], IntendedUsage.CA);
-//
-//        // Must be the same object
-//        assertSame(raw_certs[n], cert);
-//      }
-//    }
-
-    //
-    
     List<X509Certificate[]> chains = certs.getChains(raw_certs[1]);
-    assertTrue(chains.size()==2);
+    assertTrue(chains.size()==1);
     
-//    //Chain 0
-//    X509Certificate[] chain = chains.get(0);
-//    assertTrue(chain.length == 3);
-//    int[] indices = {2, 1, 0};
-//    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
-//    
-//    //Chain 1
-//    chain = chains.get(0);
-//    assertTrue(chain.length == 3);
-//    indices = new int[]{5, 4, 3};
-//    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
-    
+    //Chain 0
+    X509Certificate[] chain = chains.get(0);
+    assertTrue(chain.length == 2);
+    int[] indices = {1, 0};
+    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
 
     }catch(Exception e){e.printStackTrace();assertTrue(false);}
   }
   
-//  @Test
+  @Test
   public void testCrossCert3() throws Exception{
     try{
     System.out.println("testCrossCert3");
-    FileInputStream in = new FileInputStream("examples/multipath/KU-Loop-example.p7b");
+    FileInputStream in = new FileInputStream("examples/multipath/KU-Loop-example_1.p7b");
     PKCS7CertList bundle = new PKCS7CertList(in);
     X509Certificate[] raw_certs = bundle.getCertificateList();
     Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
@@ -617,31 +585,31 @@ public class CertificateTests {
     assertTrue(certs.isTrusted(fingerprints[0])); // CA-2
     assertTrue(certs.isTrusted(fingerprints[4])); // CA-1
 
-    // The non-leaf certificates are CA certificates
-//    for (int n = 0; n < raw_certs.length; ++n) {
-//      if (n != 1) {
-//         cert = certs.use(fingerprints[n], IntendedUsage.CA);
-//
-//        // Must be the same object
-//        assertSame(raw_certs[n], cert);
-//      }
-//    }
-
-    //
-    
     List<X509Certificate[]> chains = certs.getChains(raw_certs[7]);
-    assertTrue(chains.size()==2);
+    assertTrue(chains.size()==4);
     
     //Chain 0
     X509Certificate[] chain = chains.get(0);
     assertTrue(chain.length == 3);
-    int[] indices = {2, 1, 0};
+    int[] indices = {7, 1, 0};
     for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
     
     //Chain 1
-    chain = chains.get(0);
+    chain = chains.get(1);
+    assertTrue(chain.length == 4);
+    indices = new int[]{7, 6, 5, 4};
+    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+    //Chain 3
+    chain = chains.get(2);
     assertTrue(chain.length == 3);
-    indices = new int[]{5, 4, 3};
+    indices = new int[]{3,5,4};
+    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+    //Chain 4
+    chain = chains.get(3);
+    assertTrue(chain.length == 4);
+    indices = new int[]{3,2,1,0};
     for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
     
 
