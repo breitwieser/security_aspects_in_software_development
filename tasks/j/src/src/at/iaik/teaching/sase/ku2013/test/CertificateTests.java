@@ -14,6 +14,7 @@ import iaik.x509.extensions.KeyUsage;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.security.cert.CertificateException;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -318,7 +319,7 @@ public class CertificateTests {
     assertSame(raw_certs[0], certs.use(fingerprints[0], IntendedUsage.WRAP_KEY));
   }
   
-  @Test
+//  @Test
   public void testVerifySimple2() throws Exception {
 	System.out.println("testVerifySimple2");
 	FileInputStream in = new FileInputStream("examples/multipath/Leaf_1.p7b");
@@ -377,8 +378,279 @@ public class CertificateTests {
     
     System.out.println("end testVerifySimple2");
   }
-
+  
 //  @Test
+  public void testVerifySimple3() throws Exception {
+	FileInputStream in = new FileInputStream("examples/multipath/Loop.p7b");
+	PKCS7CertList bundle = new PKCS7CertList(in);
+	X509Certificate[] raw_certs = bundle.getCertificateList();
+    Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
+    
+
+    // Prepare the finger-prints
+    for (int n = 0; n < raw_certs.length; ++n) {
+      fingerprints[n] = new Fingerprint(raw_certs[n]);
+    }
+// 	  0) Root 1 CA
+//    1) Leaf
+//    2) Intermediate 1 CA
+//    3) Intermediate 2 CA
+//    4) Root 1 CA
+// Tree:
+//   4=0 <- 3
+//     \   /
+//		 2  
+//		 |
+//		 1
+    
+    // Create a new certificate table and add our certificates
+    Certificates certs = new Certificates();
+
+    // Mark the root certificate as trusted (The certificate is not
+    // yet in the table.)
+    // hardcoded
+    certs.addTrusted(fingerprints[0]); // Root 1 CA
+    certs.addTrusted(fingerprints[4]); // Root 1 CA
+    // Populate the certificate table with our test certificates
+    for (X509Certificate cert : raw_certs) {
+      certs.add(cert);
+    }
+
+    assertTrue(certs.isTrusted(fingerprints[0])); // Root 1 CA
+    assertTrue(certs.isTrusted(fingerprints[4])); // Root 1 CA
+
+    // The non-leaf certificates are CA certificates
+    for (int n = 0; n < raw_certs.length; ++n) {
+    	if(n != 1)
+    	{
+	      X509Certificate cert = certs.use(fingerprints[n], IntendedUsage.CA);
+	
+	      // Must be the same object
+	      assertSame(raw_certs[n], cert);
+    	}
+    }
+
+    // The leaf certificate is a CA certificate
+    assertSame(raw_certs[1], certs.use(fingerprints[1], IntendedUsage.WRAP_KEY));
+  }
+  
+//  @Test
+  public void testCrossCert1() throws Exception{
+    try{
+    System.out.println("testCrossCert1");
+    FileInputStream in = new FileInputStream("examples/multipath/Leaf_1.p7b");
+    PKCS7CertList bundle = new PKCS7CertList(in);
+    X509Certificate[] raw_certs = bundle.getCertificateList();
+    Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
+
+//  0) Root 2 CA
+//  1) Intermediate 2 CA
+//  2) Leaf
+//  3) Root 1 CA
+//  4) Intermediate 1 CA
+//  5) Leaf
+//Tree:
+//  0     3
+//   \     /
+//  1   4
+//   \   /
+//   2 = 5
+    
+    // Prepare the finger-prints
+    for (int n = 0; n < raw_certs.length; ++n) {
+      fingerprints[n] = new Fingerprint(raw_certs[n]);
+      System.out.println("subject at idx: "+n+" - "+raw_certs[n].getSubjectDN());
+      System.out.println("issuer at idx: "+n+" - "+raw_certs[n].getIssuerDN());
+    }
+
+    // Create a new certificate table and add our certificates
+    Certificates certs = new Certificates();
+
+    // Mark the root certificate as trusted (The certificate is not
+    // yet in the table.)
+    // hardcoded
+    certs.addTrusted(fingerprints[0]); // Root 1 CA
+    certs.addTrusted(fingerprints[3]); // Root 1 CA
+    // Populate the certificate table with our test certificates
+    for (X509Certificate cert : raw_certs) {
+      certs.add(cert);
+    }
+
+    assertTrue(certs.isTrusted(fingerprints[0])); // CA-2
+    assertTrue(certs.isTrusted(fingerprints[3])); // CA-1
+
+    // The non-leaf certificates are CA certificates
+//    for (int n = 0; n < raw_certs.length; ++n) {
+//      if (n != 1) {
+//         cert = certs.use(fingerprints[n], IntendedUsage.CA);
+//
+//        // Must be the same object
+//        assertSame(raw_certs[n], cert);
+//      }
+//    }
+
+    //
+    
+    List<X509Certificate[]> chains = certs.getChains(raw_certs[2]);
+    assertTrue(chains.size()==2);
+    
+    //Chain 0
+    X509Certificate[] chain = chains.get(0);
+    assertTrue(chain.length == 3);
+    int[] indices = {2, 1, 0};
+    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+    //Chain 1
+    chain = chains.get(0);
+    assertTrue(chain.length == 3);
+    indices = new int[]{5, 4, 3};
+    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+
+    }catch(Exception e){e.printStackTrace();assertTrue(false);}
+  }
+  
+  @Test
+  public void testCrossCert2() throws Exception{
+//  0) Root 1 CA
+//  1) Leaf
+//  2) Intermediate 1 CA
+//  3) Intermediate 2 CA
+//  4) Root 1 CA
+//Tree:
+// 4=0 <- 3
+//   \   /
+//   2  
+//   |
+//   1
+    
+    try{
+    System.out.println("testCrossCert2");
+    FileInputStream in = new FileInputStream("examples/multipath/Loop.p7b");
+    PKCS7CertList bundle = new PKCS7CertList(in);
+    X509Certificate[] raw_certs = bundle.getCertificateList();
+    Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
+
+    // Prepare the finger-prints
+    for (int n = 0; n < raw_certs.length; ++n) {
+      fingerprints[n] = new Fingerprint(raw_certs[n]);
+      System.out.println("subject at idx: "+n+" - "+raw_certs[n].getSubjectDN());
+      System.out.println("issuer at idx: "+n+" - "+raw_certs[n].getIssuerDN());
+    }
+
+    // Create a new certificate table and add our certificates
+    Certificates certs = new Certificates();
+
+    // Mark the root certificate as trusted (The certificate is not
+    // yet in the table.)
+    // hardcoded
+    certs.addTrusted(fingerprints[0]); // Root 1 CA
+    certs.addTrusted(fingerprints[4]); // Root 1 CA
+    // Populate the certificate table with our test certificates
+    for (X509Certificate cert : raw_certs) {
+      certs.add(cert);
+    }
+
+    assertTrue(certs.isTrusted(fingerprints[0])); // CA-2
+    assertTrue(certs.isTrusted(fingerprints[4])); // CA-1
+
+    // The non-leaf certificates are CA certificates
+//    for (int n = 0; n < raw_certs.length; ++n) {
+//      if (n != 1) {
+//         cert = certs.use(fingerprints[n], IntendedUsage.CA);
+//
+//        // Must be the same object
+//        assertSame(raw_certs[n], cert);
+//      }
+//    }
+
+    //
+    
+    List<X509Certificate[]> chains = certs.getChains(raw_certs[1]);
+    assertTrue(chains.size()==2);
+    
+//    //Chain 0
+//    X509Certificate[] chain = chains.get(0);
+//    assertTrue(chain.length == 3);
+//    int[] indices = {2, 1, 0};
+//    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+//    
+//    //Chain 1
+//    chain = chains.get(0);
+//    assertTrue(chain.length == 3);
+//    indices = new int[]{5, 4, 3};
+//    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+
+    }catch(Exception e){e.printStackTrace();assertTrue(false);}
+  }
+  
+//  @Test
+  public void testCrossCert3() throws Exception{
+    try{
+    System.out.println("testCrossCert3");
+    FileInputStream in = new FileInputStream("examples/multipath/KU-Loop-example.p7b");
+    PKCS7CertList bundle = new PKCS7CertList(in);
+    X509Certificate[] raw_certs = bundle.getCertificateList();
+    Fingerprint[] fingerprints = new Fingerprint[raw_certs.length];
+
+    // Prepare the finger-prints
+    for (int n = 0; n < raw_certs.length; ++n) {
+      fingerprints[n] = new Fingerprint(raw_certs[n]);
+      System.out.println("subject at idx: "+n+" - "+raw_certs[n].getSubjectDN());
+      System.out.println("issuer at idx: "+n+" - "+raw_certs[n].getIssuerDN());
+    }
+
+    // Create a new certificate table and add our certificates
+    Certificates certs = new Certificates();
+
+    // Mark the root certificate as trusted (The certificate is not
+    // yet in the table.)
+    // hardcoded
+    certs.addTrusted(fingerprints[0]); // Root 1 CA
+    certs.addTrusted(fingerprints[4]); // Root 1 CA
+    // Populate the certificate table with our test certificates
+    for (X509Certificate cert : raw_certs) {
+      certs.add(cert);
+    }
+
+    assertTrue(certs.isTrusted(fingerprints[0])); // CA-2
+    assertTrue(certs.isTrusted(fingerprints[4])); // CA-1
+
+    // The non-leaf certificates are CA certificates
+//    for (int n = 0; n < raw_certs.length; ++n) {
+//      if (n != 1) {
+//         cert = certs.use(fingerprints[n], IntendedUsage.CA);
+//
+//        // Must be the same object
+//        assertSame(raw_certs[n], cert);
+//      }
+//    }
+
+    //
+    
+    List<X509Certificate[]> chains = certs.getChains(raw_certs[7]);
+    assertTrue(chains.size()==2);
+    
+    //Chain 0
+    X509Certificate[] chain = chains.get(0);
+    assertTrue(chain.length == 3);
+    int[] indices = {2, 1, 0};
+    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+    //Chain 1
+    chain = chains.get(0);
+    assertTrue(chain.length == 3);
+    indices = new int[]{5, 4, 3};
+    for(int i=0;i<chain.length;i++) assertSame(chain[i], raw_certs[indices[i]]);
+    
+
+    // The leaf certificate is a CA certificate
+//    assertSame(raw_certs[1], certs.use(fingerprints[1], IntendedUsage.WRAP_KEY));
+    }catch(Exception e){e.printStackTrace();}
+  }
+  
+  //@Test
   public void testVerifyErrors() throws Exception {
     X509Certificate[] raw_certs = loadCerts(B64_PKCS7_DEVICE_CERT);
 
