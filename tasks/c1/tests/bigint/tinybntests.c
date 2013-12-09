@@ -14,6 +14,14 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     .pTests = (CU_TestInfo[]) {
       { "add.simple", TestMpAddSimple },
       { "sub.simple", TestMpSubSimple },
+      { "add.varlen", TestMpAddVarLen },
+      { "sub.varlen", TestMpSubVarLen },
+      { "add.null",   TestMpAddNull },
+      { "sub.null",   TestMpSubNull },
+      { "add.bad.dest", TestMpAddBadDest },
+      { "sub.bad.dest", TestMpSubBadDest },
+      { "add.bad.source", TestMpAddBadSource },
+      { "sub.bad.dest", TestMpSubBadSource },
       CU_TEST_INFO_NULL,
     }
   },
@@ -25,6 +33,11 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     .pCleanupFunc = &TestSuiteCleanup,
     .pTests = (CU_TestInfo[]) {
       { "mul.simple", TestMpMulSimple },
+      { "mul.varlen", TestMpMulVarLen },
+      { "mul.null",   TestMpMulNull },
+      { "mul.large",  TestMpMulLarge },
+      { "mul.bad.dest", TestMpMulBadDest },
+      { "mul.bad.source", TestMpMulBadSource },
       CU_TEST_INFO_NULL,
     }
   },
@@ -36,6 +49,7 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     .pCleanupFunc = &TestSuiteCleanup,
     .pTests = (CU_TestInfo[]) {
       { "cmp.simple", TestMpCompareSimple },
+      { "cmp.zero",   TestMpCompareZero },
       CU_TEST_INFO_NULL,
     }
   },

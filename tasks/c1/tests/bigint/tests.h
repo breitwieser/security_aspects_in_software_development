@@ -14,12 +14,26 @@
 // Unit tests for low-level multi-precision addition/subtraction (MpAdd, MpSub)
 void TestMpAddSimple(void);
 void TestMpSubSimple(void);
+void TestMpAddVarLen(void);
+void TestMpSubVarLen(void);
+void TestMpAddNull(void);
+void TestMpSubNull(void);
+void TestMpAddBadDest(void);
+void TestMpSubBadDest(void);
+void TestMpAddBadSource(void);
+void TestMpSubBadSource(void);
 
 // Unit tests for low-level multi-precision multiplication (MpMul)
 void TestMpMulSimple(void);
+void TestMpMulVarLen(void);
+void TestMpMulNull(void);
+void TestMpMulLarge(void);
+void TestMpMulBadDest(void);
+void TestMpMulBadSource(void);
 
 // Unit tests for low-level multi-precision compares (MpCompare)
 void TestMpCompareSimple(void);
+void TestMpCompareZero(void);
 
 // Common big-integer unit test helpers (in test_bigint_common.c)
 BigInteger* TestHelperBigIntInit(size_t len, const mp_word_t *init_values);

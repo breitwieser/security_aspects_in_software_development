@@ -82,3 +82,27 @@ void TestMpCompareSimple(void)
                0x00000000,  0x00000000, 0x00000000,
                0xFFFFFFFF,  0xFFFFFFFF, 0xFFFFFFFF);
 }
+
+//----------------------------------------------------------------------
+void TestMpCompareZero(void)
+{
+  // ONE = 1
+  static const uint32_t ONE[3] = { 1, 0, 0 };
+
+  // ZERO = 0
+  static const uint32_t ZERO[3] = { 0, 0, 0 };
+
+  // Simple checks
+  CU_ASSERT(MpCompare(ONE, 3, ZERO, 3) ==  1); // 1 > 0
+  CU_ASSERT(MpCompare(ZERO, 3, ONE, 3) == -1); // 0 < 1
+
+  // Try with different lengths
+  CU_ASSERT(MpCompare(ONE, 1, ONE, 3) == 0);  // 1 == 1
+  CU_ASSERT(MpCompare(ONE, 1, ZERO, 2) == 1); // 1 > 0
+
+  // Some tests with zero
+  CU_ASSERT(MpCompare(ZERO, 3, NULL, 0) == 0); // 0 == 0
+  CU_ASSERT(MpCompare(NULL, 0, ZERO, 3) == 0); // 0 == 0
+  CU_ASSERT(MpCompare(ONE, 3, NULL, 0) == 1);  // 1 > 0
+  CU_ASSERT(MpCompare(NULL, 0, ONE, 3) == -1); // 0 < -1
+}
