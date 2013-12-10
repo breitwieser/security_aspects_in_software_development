@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+enum Sign { negative = -1, zero = 0, positive = 1 };
 struct BigInteger
 {
   /// \todo Add the fields required by your big-integer implementation
@@ -25,6 +26,9 @@ struct BigInteger
   ///   \li A pointer to your underlying words array
   ///   \li The size of your word array
   ///   \li An indication of the sign (positive, negative, zero?) of the big integer.
+  enum Sign sign;
+  mp_word_t* words;
+  size_t wordcount;
 };
 
 
