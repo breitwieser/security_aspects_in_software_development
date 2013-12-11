@@ -37,8 +37,15 @@ bool BigIntNeg(BigInteger *z, const BigInteger *a)
   /// \todo Copy the value of big-integer \c a to big-integer \c z. Set
   /// the sign of \c z to the opposite of the sign of \c a.
   /// (Note that a and z may refer to the same object).
-
-  return false; // Not yet implemented
+  if(BigIntCopy(z,a))
+  {
+    if(a->sign == zero)
+      z->sign = zero;
+    else
+      z->sign = -a->sign;
+    return true;
+  }
+  return false;
 }
 
 

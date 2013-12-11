@@ -62,13 +62,21 @@ bool BigIntSetAt(BigInteger *z, size_t index, mp_word_t value)
 bool BigIntLoad(BigInteger *z, const unsigned char *data, size_t len)
 {
   /// \todo Load the byte array into the big integer.
-  if(z == NULL || data == NULL)
+  if(z == NULL)
     return false;
   if(z->words == NULL)
     return false;
+  if(len == 0)
+  {
+    BigIntFree(z);
+    z = BigIntAlloc();
+    return (z != NULL);
+  }
+  if(data == NULL)
+    return false;
   size_t usedlen = len;
 
-  for(int i = 0; i < usedlen; i++)
+  for(size_t i = 0; i < usedlen; i++)
   {
       if(data[i] != 0)
         {
@@ -84,7 +92,7 @@ bool BigIntLoad(BigInteger *z, const unsigned char *data, size_t len)
   z->words = realloc(z->words, mallcount*sizeof(mp_word_t));
   if(z->words == NULL)
     return NULL;
-  for(int i = 0; i < count; i++)
+  for(size_t i = 0; i < count; i++)
   {
       mp_word_t word = data[len-(i*4)-1]       | data[len-(i*4)-2] << 8 |
                        data[len-(i*4)-3] << 16 | data[len-(i*4)-4] << 24;
@@ -93,7 +101,7 @@ bool BigIntLoad(BigInteger *z, const unsigned char *data, size_t len)
   if(remain != 0)
   {
     mp_word_t last = 0;
-    for(int i = 0; i < remain; i++)
+    for(size_t i = 0; i < remain; i++)
       last |= data[i] << 8*i;
     z->words[count] = last;
   }
@@ -104,9 +112,11 @@ bool BigIntLoad(BigInteger *z, const unsigned char *data, size_t len)
 bool BigIntSave(unsigned char *data, size_t len, const BigInteger *a)
 {
   /// \todo Save the big integer into a byte array.  
-  if(a == NULL || data == NULL)
+  if(a == NULL)
     return false;
-  if(a->words == NULL)
+  if(len == 0)
+    return true;
+  if(data == NULL || a->words == NULL)
     return false;
   size_t wordcount = a->wordcount;
   size_t charcount = (len/4);
@@ -114,7 +124,7 @@ bool BigIntSave(unsigned char *data, size_t len, const BigInteger *a)
 
   if(charcount >= wordcount)
   {
-    for(int i = 0; i < wordcount; i++)
+    for(size_t i = 0; i < wordcount; i++)
     {
         data[len-(i*4)-1] = a->words[i] & 255;
         data[len-(i*4)-2] = (a->words[i] & 65280) >> 8;
@@ -123,7 +133,7 @@ bool BigIntSave(unsigned char *data, size_t len, const BigInteger *a)
     }
   }
   else {
-      int i = 0;
+      size_t i = 0;
       for(; i < charcount; i++)
       {
           data[len-(i*4)-1] = a->words[i] & 255;
@@ -133,9 +143,8 @@ bool BigIntSave(unsigned char *data, size_t len, const BigInteger *a)
       }
       if(remain != 0)
       {
-        for(int j = i; j < remain+i; j++)
+        for(size_t j = i; j < remain+i; j++)
         {
-            mp_word_t word = a->words[j];
             mp_word_t dfs = (255 << (8*(j-i)));
             mp_word_t df = (a->words[j] & dfs);
             data[len-j-1] = df >> (8*(j-i));
