@@ -49,10 +49,20 @@ bool BigIntSetAt(BigInteger *z, size_t index, mp_word_t value)
     return false;
   if(index >= z->wordcount)
   {
+    if(value == 0)
+      return true;
     z->words = realloc(z->words, index - (z->wordcount-1));
     if(z->words == NULL)
       return false;
     z->wordcount = index+1;
+  }
+  else if(index == z->wordcount-1 && value == 0)
+  {
+    z->words = realloc(z->words, z->wordcount-1);
+    if(z->words == NULL)
+      return false;
+    z->wordcount--;
+    return true;
   }
   z->words[index] = value;
   return true;
