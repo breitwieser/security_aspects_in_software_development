@@ -21,9 +21,9 @@ bool MpSub(mp_word_t *z, const mp_word_t *a, size_t len_a,
 		return NULL;
 
 	//generate result array
-	int len_z = len_a > len_b ? len_a : len_b;
+	size_t len_z = len_a > len_b ? len_a : len_b;
 	//do calculation
-	for (int i = 0; i < len_z; i++) {
+	for (size_t i = 0; i < len_z; i++) {
 		mp_word_t w_a = 0, w_b = 0, w_z = 0;
 		if (len_a > i)
 			w_a = a[i];
