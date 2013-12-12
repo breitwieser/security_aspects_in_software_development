@@ -134,13 +134,16 @@ bool BigIntSave(unsigned char *data, size_t len, const BigInteger *a)
 
   if(charcount >= wordcount)
   {
-    for(size_t i = 0; i < wordcount; i++)
+    size_t i = 0;
+    for(i = 0; i < wordcount; i++)
     {
         data[len-(i*4)-1] = a->words[i] & 255;
         data[len-(i*4)-2] = (a->words[i] & 65280) >> 8;
         data[len-(i*4)-3] = (a->words[i] & 16711680) >> 16;
         data[len-(i*4)-4] = (a->words[i] & 4278190080) >> 24;
     }
+    for(size_t j = 1; j < remain+1; j++)
+        data[len-(i*4)-j] = 0;
   }
   else {
       size_t i = 0;
@@ -151,14 +154,11 @@ bool BigIntSave(unsigned char *data, size_t len, const BigInteger *a)
           data[len-(i*4)-3] = (a->words[i] & 16711680) >> 16;
           data[len-(i*4)-4] = (a->words[i] & 4278190080) >> 24;
       }
-      if(remain != 0)
+      for(size_t j = 1; j < remain+1; j++)
       {
-        for(size_t j = i; j < remain+i; j++)
-        {
-            mp_word_t dfs = (255 << (8*(j-i)));
-            mp_word_t df = (a->words[j] & dfs);
-            data[len-j-1] = df >> (8*(j-i));
-        }
+          mp_word_t dfs = (255 << (8*(j-1)));
+          mp_word_t df = (a->words[i] & dfs);
+          data[len-(i*4)-j] = df >> (8*(j-1));
       }
   }
 
