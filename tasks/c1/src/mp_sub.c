@@ -22,10 +22,9 @@ bool MpSub(mp_word_t *z, const mp_word_t *a, size_t len_a,
 
 	//generate result array
 	int len_z = len_a > len_b ? len_a : len_b;
-//	printf(" \n");
 	//do calculation
 	for (int i = 0; i < len_z; i++) {
-		mp_word_t w_a, w_b, w_z = 0;
+		mp_word_t w_a = 0, w_b = 0, w_z = 0;
 		if (len_a > i)
 			w_a = a[i];
 		if (len_b > i)
@@ -33,12 +32,9 @@ bool MpSub(mp_word_t *z, const mp_word_t *a, size_t len_a,
 
 		w_z = w_a - w_b - (unsigned) borrow;
 
-
 		//overflow
 		borrow = w_z > w_a ? true : false;
 		z[i] = w_z;
-//		printf("%10x - %10x - %10x\n - borrow: %d", w_z, w_a, w_b, borrow);
-
 	}
 
 

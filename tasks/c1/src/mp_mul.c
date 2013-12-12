@@ -20,18 +20,16 @@ void MpMul(mp_word_t *restrict z, const mp_word_t *a, size_t len_a,
 		return;
 
 	//muliply
-	int len = len_a > len_b ? len_a : len_b;
 	mp_long_t carry = 0;
 
 	//initialize output var
-	for (int i = 0; i < len_a + len_b; i++)
+	for (size_t i = 0; i < len_a + len_b; i++)
 		z[i] = 0;
 
-	//	printf(" \n");
 	mp_long_t uv;
-	for (int i = 0; i < len_b; i++) {
+	for (size_t i = 0; i < len_b; i++) {
 		carry = 0;
-		for (int j = 0; j < len_a; j++) {
+		for (size_t j = 0; j < len_a; j++) {
 			mp_long_t w_a, w_b = 0;
 			if (len_a > j)
 				w_a = a[j];

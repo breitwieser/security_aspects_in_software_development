@@ -20,21 +20,17 @@ bool MpAdd(mp_word_t *z, const mp_word_t *a, size_t len_a,
 	  return NULL;
 
   //generate result array
-  int len_z = len_a > len_b ? len_a : len_b;
-//  z = (mp_word_t*) malloc(len_z  * sizeof(mp_word_t));
-//  if(z == NULL)
-//	  return 0;
-
+  size_t len_z = len_a > len_b ? len_a : len_b;
   //do calculation
-  for(int i = 0; i < len_z; i++)
+  for(size_t i = 0; i < len_z; i++)
   {
-	  mp_word_t w_a, w_b, w_z = 0;
+	  mp_word_t w_a = 0, w_b = 0, w_z = 0;
 	  if(len_a > i)
 		  w_a = a[i];
 	  if(len_b > i)
 		  w_b = b[i];
 
-	  w_z = w_a + w_b + carry;
+	  w_z = w_a + w_b + (unsigned) carry;
 	  //overflow
 	  carry = w_z < w_a ? true: false;
 	  z[i] = w_z;
