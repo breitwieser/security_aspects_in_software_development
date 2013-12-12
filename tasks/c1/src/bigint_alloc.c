@@ -24,6 +24,25 @@ BigInteger* BigIntAlloc(void)
   return big;
 }
 
+BigInteger* _BigIntAlloc(size_t count)
+{
+  if(count <= 0)
+    return NULL;
+  BigInteger* big = malloc(sizeof(BigInteger));
+  if(big == NULL)
+    return NULL;
+  big->words = malloc(count*sizeof(mp_word_t));
+  if(big->words == NULL)
+  {
+    free(big);
+    return NULL;
+  }
+  big->words[0] = 0;
+  big->sign = zero;
+  big->wordcount = 1;
+  return big;
+}
+
 //----------------------------------------------------------------------
 void BigIntFree(BigInteger *z)
 {

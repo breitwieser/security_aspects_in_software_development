@@ -22,15 +22,10 @@ bool BigIntAdd(BigInteger *z, const BigInteger *a, const BigInteger *b)
 
   if(a->sign == b->sign) // +a + +b || -a + -b
   {
-      BigInteger* res = BigIntAlloc();
+      int wordcount = MAX(a->wordcount, b->wordcount)+1; // +1 for carry
+      BigInteger* res = _BigIntAlloc(wordcount);
       if(res == NULL)
         return false;
-      int wordcount = MAX(a->wordcount, b->wordcount);
-      if(!BigIntSetAt(res, wordcount, 0)) // Allocates wordcount+1 space
-      {
-          BigIntFree(res);
-          return false;
-      }
       if(!MpAdd(res->words, a->words, a->wordcount, b->words, b->wordcount))
       {
           BigIntFree(res);
@@ -98,17 +93,13 @@ bool BigIntSub(BigInteger *z, const BigInteger *a, const BigInteger *b)
   if(a->sign == b->sign) // +a - +b || -a - -b
   {
       int cmp = BigIntCompare(a, b);
-      BigInteger* res = BigIntAlloc();
+      int wordcount = MAX(a->wordcount, b->wordcount);
+      // Allocates 0 or wordcount space
+      BigInteger* res = _BigIntAlloc(cmp == 0 ? 1 : wordcount);
       if(res == NULL)
         return false;
       if(cmp != 0)
       {
-        int wordcount = MAX(a->wordcount, b->wordcount);
-        if(!BigIntSetAt(res, wordcount-1, 0)) // Allocates wordcount space
-        {
-            BigIntFree(res);
-            return false;
-        }
         if(!MpSub(res->words, a->words, a->wordcount, b->words, b->wordcount))
         {
             BigIntFree(res);

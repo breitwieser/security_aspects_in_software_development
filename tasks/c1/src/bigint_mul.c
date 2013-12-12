@@ -14,16 +14,11 @@ bool BigIntMul(BigInteger *z, const BigInteger *a, const BigInteger *b)
   /// big-integers as \¢ a and/or \c b,
   if(z == NULL || b == NULL || a == NULL)
     return false;
-  BigInteger* res = BigIntAlloc();
+  int wordcount = a->wordcount+b->wordcount;
+  BigInteger* res = _BigIntAlloc(wordcount); // allocate enough space
   if(res == NULL)
     return false;
-  if(!BigIntSetAt(res, a->wordcount+b->wordcount, 0)) // allocate enough space
-  {
-      BigIntFree(res);
-      return false;
-  }
   MpMul(res->words, a->words, a->wordcount, b->words, b->wordcount);
-  int wordcount = res->wordcount;
   for(int i = wordcount-1; i >= 0; i--) // truncate leading zeros
   {
     if(res->words[i] != 0)

@@ -34,5 +34,6 @@ struct BigInteger
 
 /// \todo Add your own helper function declarations, type definitions,
 ///    etc. here.
+BigInteger* _BigIntAlloc(size_t count);
 
 #endif // TINYBN_IMP_H
