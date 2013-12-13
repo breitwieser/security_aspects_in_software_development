@@ -11,13 +11,6 @@ void TestBigIntSgn(void)
 	//Null pointer
 	CU_ASSERT_TRUE(BigIntSgn(NULL) == 0);
 
-	//Invalid inputs
-//	p->sign=positive;
-//	p->words=NULL;
-//	//same behaviour for consecutive calls
-//	int ret = BigIntSgn(p);
-//	CU_ASSERT_TRUE(ret == BigIntSgn(p));
-
 	//Valid inputs
 	BigInteger *b1 = TEST_BIGINT_INIT(0x12345678);
 	b1->sign=positive; //TODO müsste das nicht automatisch passieren?
@@ -29,7 +22,7 @@ void TestBigIntSgn(void)
 	CU_ASSERT_TRUE(BigIntSgn(b2) == -1);
 	BigIntFree(b2);
 
-	//FIXME: fatal fail
+//	//FIXME: fatal fail
 //	BigInteger *b3 = TEST_BIGINT_INIT(0x00000000, 0x00000000);
 //	CU_ASSERT_TRUE(BigIntSgn(b3) == 0);
 //	BigIntFree(b3);

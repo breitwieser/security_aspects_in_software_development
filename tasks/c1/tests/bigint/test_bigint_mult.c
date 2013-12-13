@@ -70,10 +70,25 @@ void TestBigIntMult() {
 	CU_ASSERT_TRUE(BigIntMul(res1, b3, b4));
 	CU_ASSERT_EQUAL(res1->sign, negative);
 	assertMagnitude(res1, (mp_word_t[] ) { 0x00000002 }, 1);
+	BigIntFree(res1);
+	//0*2=0
+	BigInteger *b5 = TEST_BIGINT_INIT(0x00000000, 0x00000000, 0x00000000);
+	res1 = BigIntAlloc();
+	b4->sign = positive;
+	CU_ASSERT_TRUE(BigIntMul(res1, b5, b4));
+	CU_ASSERT_EQUAL(res1->sign, zero);
+	assertMagnitude(res1, (mp_word_t[] ) { 0x00000000 }, 1);
+	BigIntFree(res1);
+	//2*0=0
+	res1 = BigIntAlloc();
+	CU_ASSERT_TRUE(BigIntMul(res1, b4, b5));
+	CU_ASSERT_EQUAL(res1->sign, zero);
+	assertMagnitude(res1, (mp_word_t[] ) { 0x00000000 }, 1);
+	BigIntFree(res1);
 
 	BigIntFree(b3);
 	BigIntFree(b4);
-	BigIntFree(res1);
+
 
 	//overflow
 	BigInteger *b7 = TEST_BIGINT_INIT(0xFFFFFFFF);
