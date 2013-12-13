@@ -101,17 +101,49 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
   },
 
   // Unit tests for basic big-integer functionality
-    {
-      .pName        = "bigint/compare",
-      .pInitFunc    = &TestSuiteInit,
-      .pCleanupFunc = &TestSuiteCleanup,
-      .pTests = (CU_TestInfo[]) {
-        { "test.sign", TestBigIntSgn },
-        { "compare.simple", TestBigIntCompareSimple },
-        CU_TEST_INFO_NULL,
+  {
+    .pName        = "bigint/compare",
+    .pInitFunc    = &TestSuiteInit,
+    .pCleanupFunc = &TestSuiteCleanup,
+    .pTests = (CU_TestInfo[]) {
+     { "test.sign", TestBigIntSgn },
+     { "compare.simple", TestBigIntCompareSimple },
+     CU_TEST_INFO_NULL,
+    }
+  },
+
+  {
+    .pName        = "bigint/misc",
+    .pInitFunc    = &TestSuiteInit,
+    .pCleanupFunc = &TestSuiteCleanup,
+    .pTests = (CU_TestInfo[]) {
+      { "misc.copy", TestBigIntCopy },
+      { "misc.neg", TestBigIntNeg },
+      { "misc.abs", TestBigIntAbs },
+      CU_TEST_INFO_NULL,
+     }
+   },
+
+   {
+     .pName        = "bigint/addsub",
+     .pInitFunc    = &TestSuiteInit,
+     .pCleanupFunc = &TestSuiteCleanup,
+     .pTests = (CU_TestInfo[]) {
+       { "addsub.add", TestBigIntAdd },
+       { "addsub.sub", TestBigIntAdd },
+       CU_TEST_INFO_NULL,
       }
     },
 
+    {
+      .pName        = "bigint/mult",
+      .pInitFunc    = &TestSuiteInit,
+      .pCleanupFunc = &TestSuiteCleanup,
+      .pTests = (CU_TestInfo[]) {
+        { "mult.mult", TestBigIntMult },
+        CU_TEST_INFO_NULL,
+       }
+     },
   // End of test suites
   CU_SUITE_INFO_NULL
 };
