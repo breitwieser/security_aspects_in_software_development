@@ -16,7 +16,8 @@ SOURCES   = 		 	\
 	test_bigint_basic.c	\
 	test_bigint_io.c 	\
 	test_bigint_internals.c \
-	test_bigint_common.c
+	test_bigint_common.c \
+	test_bigint_compare.c
 
 LIBS      = tinybn testing cunit
 

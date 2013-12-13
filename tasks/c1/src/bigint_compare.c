@@ -36,6 +36,9 @@ int BigIntCompare(const BigInteger *a, const BigInteger *b)
       else
           return 1;
   }
-  return MpCompare(a->words, a->wordcount, b->words, b->wordcount);
+  else if(a->sign==positive)
+	  return MpCompare(a->words, a->wordcount, b->words, b->wordcount);
+  else
+	  return MpCompare(b->words, b->wordcount, a->words, a->wordcount);
 }
 

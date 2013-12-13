@@ -34,6 +34,7 @@ void TestMpMulBadSource(void);
 // Unit tests for low-level multi-precision compares (MpCompare)
 void TestMpCompareSimple(void);
 void TestMpCompareZero(void);
+void TestMpCompareTask3(void);
 
 // Common big-integer unit test helpers (in test_bigint_common.c)
 BigInteger* TestHelperBigIntInit(size_t len, const mp_word_t *init_values);
@@ -64,6 +65,10 @@ void TestBigIntLoadNull(void);
 void TestBigIntSaveNull(void);
 void TestBigIntGetNull(void);
 void TestBigIntSetNull(void);
+
+//Unit tests for the big-integer compare functionality
+void TestBigIntCompareSimple(void);
+void TestBigIntSgn(void);
 
 // Unit tests for the internal details of the big-integer API
 // (the array is defined in test_bigint_internals.c)

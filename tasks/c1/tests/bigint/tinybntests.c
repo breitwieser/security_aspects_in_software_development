@@ -50,6 +50,7 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     .pTests = (CU_TestInfo[]) {
       { "cmp.simple", TestMpCompareSimple },
       { "cmp.zero",   TestMpCompareZero },
+      { "cmp.task3",   TestMpCompareTask3 },
       CU_TEST_INFO_NULL,
     }
   },
@@ -98,6 +99,18 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     // The test are defined in test_bigint_internal.c
     .pTests = BIGINT_INTERNAL_TESTS,
   },
+
+  // Unit tests for basic big-integer functionality
+    {
+      .pName        = "bigint/compare",
+      .pInitFunc    = &TestSuiteInit,
+      .pCleanupFunc = &TestSuiteCleanup,
+      .pTests = (CU_TestInfo[]) {
+        { "test.sign", TestBigIntSgn },
+        { "compare.simple", TestBigIntCompareSimple },
+        CU_TEST_INFO_NULL,
+      }
+    },
 
   // End of test suites
   CU_SUITE_INFO_NULL

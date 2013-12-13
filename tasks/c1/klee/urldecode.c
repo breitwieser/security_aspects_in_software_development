@@ -62,6 +62,8 @@ int main(void)
 
   /// \todo Make your URL "input" variable symbolic and find a way to tell
   ///  KLEE that it is a valid C string, which always ends with '\0'.
+  klee_make_symbolic(&input, sizeof(input), "input");
+  klee_assume(input[URL_LEN - 1] == '\0');
 
   // The output URL
   // (we intentionally make this buffer a little bit too small, to cause some

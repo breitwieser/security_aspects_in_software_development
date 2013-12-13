@@ -106,3 +106,14 @@ void TestMpCompareZero(void)
   CU_ASSERT(MpCompare(ONE, 3, NULL, 0) == 1);  // 1 > 0
   CU_ASSERT(MpCompare(NULL, 0, ONE, 3) == -1); // 0 < -1
 }
+
+//----------------------------------------------------------------------
+void TestMpCompareTask3(void)
+{
+	// ONE = 1
+	static const uint32_t ONE[3] = { 1, 0, 0 };
+
+	//NULL Pointer
+	CU_ASSERT(MpCompare(NULL, 5, ONE, 3) == -2);
+	CU_ASSERT(MpCompare(ONE, 3, NULL, 1) == -2);
+}
