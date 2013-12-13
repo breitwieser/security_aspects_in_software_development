@@ -51,14 +51,16 @@ bool BigIntSetAt(BigInteger *z, size_t index, mp_word_t value)
   {
     if(value == 0)
       return true;
-    z->words = realloc(z->words, index - (z->wordcount-1));
+    z->words = (mp_word_t*)realloc(z->words, (index+1)*sizeof(mp_word_t));
     if(z->words == NULL)
       return false;
+    for(size_t i = z->wordcount; i < index+1; i++)
+      z->words[i] = 0;
     z->wordcount = index+1;
   }
   else if(index == z->wordcount-1 && value == 0)
   {
-    z->words = realloc(z->words, z->wordcount-1);
+    z->words = (mp_word_t*)realloc(z->words, (z->wordcount-1)*sizeof(mp_word_t));
     if(z->words == NULL)
       return false;
     z->wordcount--;
@@ -78,9 +80,7 @@ bool BigIntLoad(BigInteger *z, const unsigned char *data, size_t len)
     return false;
   if(len == 0)
   {
-    BigIntFree(z);
-    z = BigIntAlloc();
-    return (z != NULL);
+    return _BigIntNull(z);
   }
   if(data == NULL)
     return false;
