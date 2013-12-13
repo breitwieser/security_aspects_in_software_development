@@ -9,10 +9,10 @@ BigInteger* BigIntAlloc(void)
 {
   /// \todo Allocate a new big-integer data structure and initialize
   ///   it to represent the big-integer value zero.
-  BigInteger* big = malloc(sizeof(BigInteger));
+  BigInteger* big = (BigInteger*)malloc(sizeof(BigInteger));
   if(big == NULL)
     return NULL;
-  big->words = malloc(sizeof(mp_word_t));
+  big->words = (mp_word_t*)malloc(sizeof(mp_word_t));
   if(big->words == NULL)
   {
     free(big);
@@ -28,10 +28,10 @@ BigInteger* _BigIntAlloc(size_t count)
 {
   if(count <= 0)
     return NULL;
-  BigInteger* big = malloc(sizeof(BigInteger));
+  BigInteger* big = (BigInteger*)malloc(sizeof(BigInteger));
   if(big == NULL)
     return NULL;
-  big->words = malloc(count*sizeof(mp_word_t));
+  big->words = (mp_word_t*)malloc(count*sizeof(mp_word_t));
   if(big->words == NULL)
   {
     free(big);
@@ -41,6 +41,18 @@ BigInteger* _BigIntAlloc(size_t count)
   big->sign = zero;
   big->wordcount = 1;
   return big;
+}
+
+bool _BigIntNull(BigInteger *z)
+{
+  if(z == NULL)
+    return false;
+  z->words = (mp_word_t*)realloc(z->words, sizeof(mp_word_t));
+  if(z->words == NULL)
+    return false;
+  z->wordcount = 1;
+  z->sign = zero;
+  return true;
 }
 
 //----------------------------------------------------------------------
