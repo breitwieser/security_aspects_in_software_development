@@ -51,18 +51,30 @@ bool BigIntSetAt(BigInteger *z, size_t index, mp_word_t value)
   {
     if(value == 0)
       return true;
-    z->words = (mp_word_t*)realloc(z->words, (index+1)*sizeof(mp_word_t));
-    if(z->words == NULL)
-      return false;
+    mp_word_t *tmp = (mp_word_t*)realloc(z->words, (index+1)*sizeof(mp_word_t));
+    if(tmp == NULL){
+          if(z->words != NULL){
+        	  free(z->words);
+        	  z->words=NULL;
+          }
+          return false;
+        }
+        z->words = tmp;
     for(size_t i = z->wordcount; i < index+1; i++)
       z->words[i] = 0;
     z->wordcount = index+1;
   }
   else if(index == z->wordcount-1 && value == 0)
   {
-    z->words = (mp_word_t*)realloc(z->words, (z->wordcount-1)*sizeof(mp_word_t));
-    if(z->words == NULL)
+    mp_word_t *tmp = (mp_word_t*)realloc(z->words, (z->wordcount-1)*sizeof(mp_word_t));
+    if(tmp == NULL){
+      if(z->words != NULL){
+    	  free(z->words);
+    	  z->words=NULL;
+      }
       return false;
+    }
+    z->words = tmp;
     z->wordcount--;
     return true;
   }
@@ -99,9 +111,15 @@ bool BigIntLoad(BigInteger *z, const unsigned char *data, size_t len)
   z->sign = positive; // todo check for 0
   size_t mallcount = remain == 0 ? count :count+1;
   z->wordcount = mallcount;
-  z->words = realloc(z->words, mallcount*sizeof(mp_word_t));
-  if(z->words == NULL)
+  mp_word_t *tmp = realloc(z->words, mallcount*sizeof(mp_word_t));
+  if(tmp == NULL){
+    if(z->words != NULL){
+      free(z->words);
+      z->words=NULL;
+    }
     return NULL;
+  }
+  z->words = tmp;
   for(size_t i = 0; i < count; i++)
   {
       mp_word_t word = data[len-(i*4)-1]       | data[len-(i*4)-2] << 8 |

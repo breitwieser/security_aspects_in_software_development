@@ -47,9 +47,16 @@ bool _BigIntNull(BigInteger *z)
 {
   if(z == NULL)
     return false;
-  z->words = (mp_word_t*)realloc(z->words, sizeof(mp_word_t));
-  if(z->words == NULL)
-    return false;
+  mp_word_t *tmp = (mp_word_t*)realloc(z->words, sizeof(mp_word_t));
+  if(tmp == NULL){
+	  if(z->words != NULL)
+	  {
+		  free(z->words);
+		  z->words=NULL;
+	  }
+	  return false;
+  }
+  z->words = tmp;
   z->wordcount = 1;
   z->sign = zero;
   return true;

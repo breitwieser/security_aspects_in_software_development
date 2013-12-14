@@ -55,6 +55,7 @@ void TestBigIntAllocSimple(void);
 void TestBigIntAllocNoMem(void);
 void TestBigIntInitSimple(void);
 void TestBigIntFreeNull(void);
+void TestBigIntAllocTask3(void);
 
 // Unit tests for the big-integer I/O API
 void TestBigIntLoadSimple(void);
@@ -68,6 +69,7 @@ void TestBigIntLoadNull(void);
 void TestBigIntSaveNull(void);
 void TestBigIntGetNull(void);
 void TestBigIntSetNull(void);
+void TestBigIntIOTask3(void);
 
 //Unit tests for the big-integer compare functionality
 void TestBigIntCompareSimple(void);

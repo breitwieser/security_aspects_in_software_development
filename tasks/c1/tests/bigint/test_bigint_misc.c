@@ -61,6 +61,7 @@ void TestBigIntCopy(void) {
 	b10->words=NULL;
 	BigInteger *b11 = TEST_BIGINT_INIT(0x12345678);
 	CU_ASSERT_FALSE(BigIntCopy(b11, b10));
+	CU_ASSERT_TRUE(BigIntCopy(b10, b11)); //should work
 	BigIntFree(b10);
 	BigIntFree(b11);
 }
@@ -140,6 +141,7 @@ void TestBigIntNeg(void) {
 	b10->words = NULL;
 	BigInteger *b11 = TEST_BIGINT_INIT(0x12345678);
 	CU_ASSERT_FALSE(BigIntNeg(b11, b10));
+	CU_ASSERT_TRUE(BigIntNeg(b10, b11)); //should work
 	BigIntFree(b10);
 	BigIntFree(b11);
 
@@ -220,6 +222,7 @@ void TestBigIntAbs(void) {
 	b10->words = NULL;
 	BigInteger *b11 = TEST_BIGINT_INIT(0x12345678);
 	CU_ASSERT_FALSE(BigIntAbs(b11, b10));
+	CU_ASSERT_TRUE(BigIntAbs(b10, b11)); //should work
 	BigIntFree(b10);
 	BigIntFree(b11);
 }

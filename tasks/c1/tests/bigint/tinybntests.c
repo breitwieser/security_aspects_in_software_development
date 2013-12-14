@@ -65,6 +65,7 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
       { "alloc.nomem",  TestBigIntAllocNoMem  },
       { "init.simple",  TestBigIntInitSimple },
       { "free.null",    TestBigIntFreeNull },
+      { "alloc.task3",    TestBigIntAllocTask3 },
       CU_TEST_INFO_NULL,
     }
   },
@@ -86,6 +87,7 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
       { "save.null", TestBigIntSaveNull },
       { "get.null", TestBigIntGetNull },
       { "set.null", TestBigIntSetNull },
+      { "io.task3", TestBigIntIOTask3 },
       CU_TEST_INFO_NULL,
     }
   },

@@ -154,9 +154,10 @@ void TestBigIntAdd(void) {
 	//words = NULL FIXME ich denke da sollte die Berechnung trotzdem gemacht werden
 	free(b9->words);
 	b9->words=NULL;
-	CU_ASSERT_FALSE(BigIntAdd(b9, b10, b11));
-	CU_ASSERT_FALSE(BigIntAdd(b10, b9, b11));
-	CU_ASSERT_FALSE(BigIntAdd(b10, b11, b9));
+	CU_ASSERT_TRUE(BigIntAdd(b9, b10, b11));
+	CU_ASSERT_TRUE(BigIntAdd(b10, b9, b11));
+	CU_ASSERT_TRUE(BigIntAdd(b10, b11, b9));
+	//TODO assert result
 	BigIntFree(b9);
 	BigIntFree(b10);
 	BigIntFree(b11);
@@ -319,9 +320,10 @@ void TestBigIntSub(void) {
 	//words = NULL; FIXME ich denke da sollte die Berechnung trotzdem gemacht werden
 	free(b9->words);
 	b9->words=NULL;
-	CU_ASSERT_FALSE(BigIntSub(b9, b10, b11));
-	CU_ASSERT_FALSE(BigIntSub(b10, b9, b11));
-	CU_ASSERT_FALSE(BigIntSub(b10, b11, b9));
+	CU_ASSERT_TRUE(BigIntSub(b9, b10, b11));
+	CU_ASSERT_TRUE(BigIntSub(b10, b9, b11));
+	CU_ASSERT_TRUE(BigIntSub(b10, b11, b9));
+	//TODO assert result
 	BigIntFree(b9);
 	BigIntFree(b10);
 	BigIntFree(b11);

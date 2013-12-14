@@ -3,6 +3,7 @@
 /// \brief Basic big integer tests.
 ///
 #include "tests.h"
+#include "tinybn_imp.h"
 
 //----------------------------------------------------------------------
 void TestBigIntAllocSimple(void)
@@ -86,4 +87,30 @@ void TestBigIntFreeNull(void)
 {
   // Try to free the NULL big integer
   BigIntFree(NULL);
+}
+
+//----------------------------------------------------------------------
+void TestBigIntAllocTask3(void)
+{
+	//BigIntAlloc
+	TestSetAllocFaultCountdown(2);
+	CU_ASSERT_PTR_NULL(BigIntAlloc());
+	TestNoAllocFaults();
+
+	//_BigIntAlloc(size_t count)
+	CU_ASSERT_PTR_NULL(_BigIntAlloc(0));
+	TestSetAllocFaultCountdown(1);
+	CU_ASSERT_PTR_NULL(_BigIntAlloc(2));
+	TestSetAllocFaultCountdown(2);
+	CU_ASSERT_PTR_NULL(_BigIntAlloc(2));
+	TestNoAllocFaults();
+
+	//_BigIntNull(BigInteger *z)
+	CU_ASSERT_FALSE(_BigIntNull(NULL));
+	BigInteger *b3 = TEST_BIGINT_INIT(0xFFFFFFFF, 0xFFFFFFFF);
+	TestSetAllocFaultCountdown(1);
+	CU_ASSERT_FALSE(_BigIntNull(b3));
+	TestNoAllocFaults();
+	BigIntFree(b3);
+
 }
