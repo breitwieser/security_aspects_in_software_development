@@ -423,11 +423,10 @@ void TestBigIntIOTask3(void) {
 	assertMagnitude(b5,  (mp_word_t[]) {0x89ABCDEF, 0x1234567}, 2);
 	BigIntFree(b5);
 
-	//FIXME doesn't work
-//	BigInteger *b_5_1 = TEST_BIGINT_INIT(0x00000000);
-//	CU_ASSERT_TRUE(BigIntLoad(b_5_1, TEST_00, sizeof(TEST_00)));
-//	CU_ASSERT_EQUAL(b_5_1->sign, zero);
-//	BigIntFree(b_5_1);
+	BigInteger *b_5_1 = BigIntAlloc();
+	CU_ASSERT_TRUE(BigIntLoad(b_5_1, TEST_00, sizeof(TEST_00)));
+	CU_ASSERT_EQUAL(b_5_1->sign, zero);
+	BigIntFree(b_5_1);
 
 	BigInteger *b6 = BigIntAlloc();
 	TestSetAllocFaultCountdown(1);

@@ -32,6 +32,7 @@ BigInteger* _BigIntAlloc(size_t count)
   if(big == NULL)
     return NULL;
 
+  big->words=NULL;
   if((size_t)(count*sizeof(mp_word_t)) < count)
   {
       BigIntFree(big);

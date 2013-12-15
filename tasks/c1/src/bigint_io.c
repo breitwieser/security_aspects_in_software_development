@@ -82,17 +82,14 @@ bool BigIntLoad(BigInteger *z, const unsigned char *data, size_t len)
 
   for(size_t i = 0; i < usedlen; i++)
   {
-      if(data[i] != 0)
+      if(data[i] != 0 || (i==(usedlen-1) && data[i] == NULL))
         {
           usedlen -= i;
           break;
         }
   }
-  if(usedlen == 0)
-  {
-      usedlen = 1;
-      z->sign = zero;
-  }
+  if(usedlen == 1)
+	  z->sign=zero;
   else
     z->sign = positive;
   size_t count = (int)(usedlen/4.0);

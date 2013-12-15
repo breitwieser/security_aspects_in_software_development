@@ -88,6 +88,7 @@ void TestBigIntMult() {
 
 	BigIntFree(b3);
 	BigIntFree(b4);
+	BigIntFree(b5);
 
 
 	//overflow
