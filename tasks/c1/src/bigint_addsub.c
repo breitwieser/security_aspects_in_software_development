@@ -95,6 +95,8 @@ bool BigIntSub(BigInteger *z, const BigInteger *a, const BigInteger *b)
   if(a->sign == b->sign) // +a - +b || -a - -b
   {
       int cmp = BigIntCompare(a, b);
+      if(a->sign == negative)
+        cmp *= -1;
       int wordcount = MAX(a->wordcount, b->wordcount);
       // Allocates 1 or wordcount space
       BigInteger* res = _BigIntAlloc(cmp == 0 ? 1 : wordcount);
