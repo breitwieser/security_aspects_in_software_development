@@ -285,7 +285,6 @@ void TestBigIntSub(void) {
 	assertMagnitude(res1, (mp_word_t[] ) { 0x00000003 }, 1);
 	BigIntFree(res1);
 	//-1-2=-3
-	BigIntFree(res1);
 	res1 = BigIntAlloc();
 	b3->sign = negative;
 	b4->sign = positive;
@@ -319,7 +318,7 @@ void TestBigIntSub(void) {
 	CU_ASSERT_TRUE(BigIntSub(res2, b6, b5));
 	CU_ASSERT_EQUAL(res2->sign, zero);
 	assertMagnitude(res2, (mp_word_t[] ) { 0x00000000 }, 1);
-	BigIntFree(zero);
+	BigIntFree(res2);
 	//1-1=0
 	BigIntFree(b5);
 	BigIntFree(b6);
@@ -376,19 +375,19 @@ void TestBigIntSub(void) {
 	CU_ASSERT_FALSE(BigIntSub(b9, b10, NULL));
 	free(b9->words);
 	b9->words = NULL;
-	// 2-2=4
+	// 2-2=0
 	CU_ASSERT_TRUE(BigIntSub(b9, b10, b11));
 	CU_ASSERT_EQUAL(b9->sign, zero);
 	assertMagnitude(b9, (mp_word_t[] ) { 0x00000000 }, 1);
-	// 4-(-2)=6
+	// 2-(-2)=4
 	b11->sign = negative;
-	CU_ASSERT_TRUE(BigIntSub(b10, b9, b11));
-	CU_ASSERT_EQUAL(b10->sign, positive);
-	assertMagnitude(b10, (mp_word_t[] ) { 0x00000006 }, 1);
+	CU_ASSERT_TRUE(BigIntSub(b9, b10, b11));
+	CU_ASSERT_EQUAL(b9->sign, positive);
+	assertMagnitude(b9, (mp_word_t[] ) { 0x00000004 }, 1);
 	// -4-(-2)=-2
 	b9->sign = negative;
 	b11->sign = negative;
-	CU_ASSERT_TRUE(BigIntSub(b10, b11, b9));
+	CU_ASSERT_TRUE(BigIntSub(b10, b9, b11));
 	CU_ASSERT_EQUAL(b10->sign, negative);
 	assertMagnitude(b10, (mp_word_t[] ) { 0x00000002 }, 1);
 	BigIntFree(b9);
