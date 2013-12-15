@@ -50,5 +50,5 @@ int main(void)
   klee_assume(name[L-1] == '\0');
   HelloWorld(name);
 
-	return 0;
+  return 0;
 }
