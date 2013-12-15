@@ -18,7 +18,7 @@ bool BigIntAdd(BigInteger *z, const BigInteger *a, const BigInteger *b)
 
   if(a->sign == b->sign) // +a + +b || -a + -b
   {
-      int wordcount = MAX(a->wordcount, b->wordcount);
+      size_t wordcount = MAX(a->wordcount, b->wordcount);
       BigInteger* res = _BigIntAlloc(wordcount);
       if(res == NULL)
         return false;
@@ -39,8 +39,9 @@ bool BigIntAdd(BigInteger *z, const BigInteger *a, const BigInteger *b)
           wordcount = i;
           break;
         }
-        else if(i == 1)
-          wordcount = 1;
+//        Can never happen
+//        else if(i == 1)
+//          wordcount = 1;
       }
       res->wordcount = MAX(wordcount,1);
       res->sign = a->sign;

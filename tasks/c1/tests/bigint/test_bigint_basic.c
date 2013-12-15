@@ -3,6 +3,7 @@
 /// \brief Basic big integer tests.
 ///
 #include "tests.h"
+#include "tinybn.h"
 #include "tinybn_imp.h"
 
 //----------------------------------------------------------------------
@@ -104,6 +105,13 @@ void TestBigIntAllocTask3(void)
 	TestSetAllocFaultCountdown(2);
 	CU_ASSERT_PTR_NULL(_BigIntAlloc(2));
 	TestNoAllocFaults();
+	CU_ASSERT_PTR_NULL(_BigIntAlloc(MP_WORD_MAX)); //not enough memory
+
+	//_BigIntResize
+	CU_ASSERT_PTR_NULL(_BigIntResize(NULL, 1));
+	BigInteger *b4 = BigIntAlloc();
+	CU_ASSERT_PTR_NULL(_BigIntResize(b4, MP_WORD_MAX)); //not enough memory
+	BigIntFree(b4);
 
 	//_BigIntNull(BigInteger *z)
 	CU_ASSERT_FALSE(_BigIntNull(NULL));

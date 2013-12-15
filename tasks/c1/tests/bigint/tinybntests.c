@@ -132,7 +132,7 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
      .pCleanupFunc = &TestSuiteCleanup,
      .pTests = (CU_TestInfo[]) {
        { "addsub.add", TestBigIntAdd },
-       { "addsub.sub", TestBigIntAdd },
+       { "addsub.sub", TestBigIntSub },
        CU_TEST_INFO_NULL,
       }
     },
