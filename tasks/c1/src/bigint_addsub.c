@@ -39,7 +39,8 @@ bool BigIntAdd(BigInteger *z, const BigInteger *a, const BigInteger *b)
           wordcount = i;
           break;
         }
-//        Can never happen
+//        Can never happen, result must be zero && a->sign==b->sign
+//        --> a->sign=zero and b->sign==zero and this case is already handled
 //        else if(i == 1)
 //          wordcount = 1;
       }
@@ -116,8 +117,9 @@ bool BigIntSub(BigInteger *z, const BigInteger *a, const BigInteger *b)
             wordcount = i;
             break;
           }
-          else if(i == 1)
-            wordcount = 1;
+//          cannot happen see explanation like in BigIntAdd
+//          else if(i == 1)
+//            wordcount = 1;
         }
         res->wordcount = MAX(1,wordcount);
         /* +a - +b

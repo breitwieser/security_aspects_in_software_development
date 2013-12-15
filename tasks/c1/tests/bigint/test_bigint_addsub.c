@@ -319,6 +319,15 @@ void TestBigIntSub(void) {
 	CU_ASSERT_EQUAL(res2->sign, zero);
 	assertMagnitude(res2, (mp_word_t[] ) { 0x00000000 }, 1);
 	BigIntFree(res2);
+	//1-0=1
+	BigIntFree(b5);
+	b5 = TEST_BIGINT_INIT(0x00000000, 0x00000000, 0x00000001);
+	b5->sign = positive;
+	res2 = BigIntAlloc();
+	CU_ASSERT_TRUE(BigIntSub(res2, b5, b6));
+	CU_ASSERT_EQUAL(res2->sign, positive);
+	assertMagnitude(res2, (mp_word_t[] ) { 0x00000001 }, 1);
+	BigIntFree(res2);
 	//1-1=0
 	BigIntFree(b5);
 	BigIntFree(b6);
@@ -393,4 +402,41 @@ void TestBigIntSub(void) {
 	BigIntFree(b9);
 	BigIntFree(b10);
 	BigIntFree(b11);
+
+
+	//malloc errors
+	//1st alloc fails
+	BigInteger *b12 = TEST_BIGINT_INIT(0x00000001);
+	BigInteger *b13 = TEST_BIGINT_INIT(0xFFFFFFFF);
+	BigInteger *b14 = BigIntAlloc();
+	b12->sign = positive;
+	b13->sign = positive;
+	TestSetAllocFaultCountdown(1);
+	CU_ASSERT_FALSE(BigIntSub(b14, b12, b13));
+	TestNoAllocFaults();
+	b12->sign = positive;
+	b13->sign = negative;
+	TestSetAllocFaultCountdown(1);
+	CU_ASSERT_FALSE(BigIntSub(b14, b12, b13));
+	TestNoAllocFaults();
+	TestSetAllocFaultCountdown(1);
+	CU_ASSERT_FALSE(BigIntSub(b14, b13, b12));
+	TestNoAllocFaults();
+	//2nd BigInteger creation fails ->3rd alloc
+	b12->sign = positive;
+	b13->sign = positive;
+	TestSetAllocFaultCountdown(3);
+	CU_ASSERT_FALSE(BigIntSub(b14, b12, b13));
+	TestNoAllocFaults();
+	b12->sign = positive;
+	b13->sign = negative;
+	TestSetAllocFaultCountdown(3);
+	CU_ASSERT_FALSE(BigIntSub(b14, b12, b13));
+	TestNoAllocFaults();
+	TestSetAllocFaultCountdown(3);
+	CU_ASSERT_FALSE(BigIntSub(b14, b13, b12));
+	TestNoAllocFaults();
+	BigIntFree(b12);
+	BigIntFree(b13);
+	BigIntFree(b14);
 }
