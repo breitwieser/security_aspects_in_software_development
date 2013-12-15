@@ -4,16 +4,12 @@
 ///
 #include "tinybn_imp.h"
 
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
-
 //----------------------------------------------------------------------
 bool BigIntAdd(BigInteger *z, const BigInteger *a, const BigInteger *b)
 {
   /// \todo Implement the big-integer addition function. Use your MpAdd
   ///   and MpSub functions for the low-level arithmetic.
   if(z == NULL || b == NULL || a == NULL)
-    return false;
-  if(z->words == NULL || a->words == NULL || b->words == NULL)
     return false;
   if(a->sign == zero)
     return BigIntCopy(z,b);
@@ -22,24 +18,31 @@ bool BigIntAdd(BigInteger *z, const BigInteger *a, const BigInteger *b)
 
   if(a->sign == b->sign) // +a + +b || -a + -b
   {
-      int wordcount = MAX(a->wordcount, b->wordcount)+1; // +1 for carry
+      int wordcount = MAX(a->wordcount, b->wordcount);
       BigInteger* res = _BigIntAlloc(wordcount);
       if(res == NULL)
         return false;
-      if(!MpAdd(res->words, a->words, a->wordcount, b->words, b->wordcount))
+      if(MpAdd(res->words, a->words, a->wordcount, b->words, b->wordcount)) // carry
       {
-          BigIntFree(res);
-          return false;
+          wordcount++;
+          if(!_BigIntResize(res, wordcount))
+          {
+              BigIntFree(res);
+              return false;
+          }
+          res->words[wordcount-1] = 1;
       }
-      for(int i = wordcount; i >= 0; i--) // truncate leading zeros
+      for(int i = wordcount; i > 0; i--) // truncate leading zeros
       {
-        if(res->words[i] != 0)
+        if(res->words[i-1] != 0)
         {
           wordcount = i;
           break;
         }
+        else if(i == 1)
+          wordcount = 1;
       }
-      res->wordcount = wordcount;
+      res->wordcount = MAX(wordcount,1);
       res->sign = a->sign;
       bool result = BigIntCopy(z, res);
       BigIntFree(res);
@@ -55,7 +58,7 @@ bool BigIntAdd(BigInteger *z, const BigInteger *a, const BigInteger *b)
         BigIntFree(res);
         return false;
     }
-    bool result = BigIntSub(z, a, b); // +a - +b
+    bool result = BigIntSub(z, a, res); // +a - +b
     BigIntFree(res);
     return result;
   }
@@ -69,12 +72,12 @@ bool BigIntAdd(BigInteger *z, const BigInteger *a, const BigInteger *b)
         BigIntFree(res);
         return false;
     }
-    bool result = BigIntSub(z, b, a); // +b - +a
+    bool result = BigIntSub(z, b, res); // +b - +a
     BigIntFree(res);
     return result;
   }
 
-  return false; // Not yet implemented
+  return false;
 }
 
 //----------------------------------------------------------------------
@@ -84,8 +87,6 @@ bool BigIntSub(BigInteger *z, const BigInteger *a, const BigInteger *b)
   ///   and MpSub functions for the low-level arithmetic.
   if(z == NULL || b == NULL || a == NULL)
     return false;
-  if(z->words == NULL || a->words == NULL || b->words == NULL)
-    return false;
   if(a->sign == zero)
     return BigIntCopy(z,b);
   if(b->sign == zero)
@@ -94,26 +95,28 @@ bool BigIntSub(BigInteger *z, const BigInteger *a, const BigInteger *b)
   {
       int cmp = BigIntCompare(a, b);
       int wordcount = MAX(a->wordcount, b->wordcount);
-      // Allocates 0 or wordcount space
+      // Allocates 1 or wordcount space
       BigInteger* res = _BigIntAlloc(cmp == 0 ? 1 : wordcount);
       if(res == NULL)
         return false;
       if(cmp != 0)
       {
-        if(!MpSub(res->words, a->words, a->wordcount, b->words, b->wordcount))
+        if(MpSub(res->words, a->words, a->wordcount, b->words, b->wordcount))
         {
-            BigIntFree(res);
-            return false;
+            mp_word_t null[1] = {0};
+            MpSub(res->words, null, 1, res->words, res->wordcount);
         }
-        for(int i = wordcount; i >= 0; i--) // truncate leading zeros
+        for(int i = wordcount; i > 0; i--) // truncate leading zeros
         {
-          if(res->words[i] != 0)
+          if(res->words[i-1] != 0)
           {
             wordcount = i;
             break;
           }
+          else if(i == 1)
+            wordcount = 1;
         }
-        res->wordcount = wordcount;
+        res->wordcount = MAX(1,wordcount);
         /* +a - +b
          *  a < b => +*- => - (eg. 3-5)
          *  a > b => +*+ => + (eg. 5-3)
@@ -137,7 +140,7 @@ bool BigIntSub(BigInteger *z, const BigInteger *a, const BigInteger *b)
         BigIntFree(res);
         return false;
     }
-    bool result = BigIntAdd(z, a, b); // +a + +b
+    bool result = BigIntAdd(z, a, res); // +a + +b
     BigIntFree(res);
     return result;
   }
@@ -151,9 +154,9 @@ bool BigIntSub(BigInteger *z, const BigInteger *a, const BigInteger *b)
         BigIntFree(res);
         return false;
     }
-    bool result = BigIntAdd(z, b, a); // -a + -b
+    bool result = BigIntAdd(z, res, a); // -a + -b
     BigIntFree(res);
     return result;
   }
-  return false; // Not yet implemented
+  return false;
 }

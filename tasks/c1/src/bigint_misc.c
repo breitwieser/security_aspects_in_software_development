@@ -21,11 +21,9 @@ bool BigIntCopy(BigInteger *z, const BigInteger *a)
   if(a->words == NULL)
     return false;
   z->sign = a->sign;
-  mp_word_t *tmp = (mp_word_t*)realloc(z->words, a->wordcount*sizeof(mp_word_t));
-  if(tmp == NULL)
+
+  if(!_BigIntResize(z, a->wordcount))
       return false;
-  z->words = tmp;
-  z->wordcount = a->wordcount;
   memcpy(z->words, a->words, a->wordcount*sizeof(mp_word_t));
   return true;
  }

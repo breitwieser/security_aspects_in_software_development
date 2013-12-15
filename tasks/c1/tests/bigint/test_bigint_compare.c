@@ -13,7 +13,7 @@ void TestBigIntSgn(void)
 
 	//Valid inputs
 	BigInteger *b1 = TEST_BIGINT_INIT(0x12345678);
-	b1->sign=positive; //TODO müsste das nicht automatisch passieren?
+	b1->sign=positive;
 	CU_ASSERT_TRUE(BigIntSgn(b1)==1);
 	BigIntFree(b1);
 
@@ -22,10 +22,9 @@ void TestBigIntSgn(void)
 	CU_ASSERT_TRUE(BigIntSgn(b2) == -1);
 	BigIntFree(b2);
 
-//	//FIXME: fatal fail
-//	BigInteger *b3 = TEST_BIGINT_INIT(0x00000000, 0x00000000);
-//	CU_ASSERT_TRUE(BigIntSgn(b3) == 0);
-//	BigIntFree(b3);
+	BigInteger *b3 = TEST_BIGINT_INIT(0x00000000, 0x00000000);
+	CU_ASSERT_TRUE(BigIntSgn(b3) == 0);
+	BigIntFree(b3);
 
 }
 

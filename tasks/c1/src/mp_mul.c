@@ -30,7 +30,7 @@ void MpMul(mp_word_t *restrict z, const mp_word_t *a, size_t len_a,
 	for (size_t i = 0; i < len_b; i++) {
 		carry = 0;
 		for (size_t j = 0; j < len_a; j++) {
-			mp_long_t w_a, w_b = 0;
+			mp_long_t w_a = 0, w_b = 0;
 			if (len_a > j)
 				w_a = a[j];
 			if (len_b > i)

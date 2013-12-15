@@ -36,5 +36,8 @@ struct BigInteger
 ///    etc. here.
 BigInteger* _BigIntAlloc(size_t count);
 bool _BigIntNull(BigInteger *z);
+bool _BigIntResize(BigInteger *z, size_t size);
+
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
 
 #endif // TINYBN_IMP_H

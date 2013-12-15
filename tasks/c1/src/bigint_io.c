@@ -29,7 +29,7 @@ mp_word_t BigIntGetAt(const BigInteger *z, size_t index)
     return 0;
   if(z->words == NULL)
     return 0;
-  if(index < 0 || index >= z->wordcount)
+  if(index >= z->wordcount)
     return 0;
   return z->words[index];
 }
@@ -44,40 +44,24 @@ bool BigIntSetAt(BigInteger *z, size_t index, mp_word_t value)
   if(z == NULL)
     return false;
   if(z->words == NULL)
-    return false;
-  if(index < 0)
-    return false;
+    z->wordcount = 0;
   if(index >= z->wordcount)
   {
     if(value == 0)
       return true;
-    mp_word_t *tmp = (mp_word_t*)realloc(z->words, (index+1)*sizeof(mp_word_t));
-    if(tmp == NULL){
-          if(z->words != NULL){
-        	  free(z->words);
-        	  z->words=NULL;
-          }
-          return false;
-        }
-        z->words = tmp;
-    for(size_t i = z->wordcount; i < index+1; i++)
+    int wordcount = z->wordcount;
+    if(!_BigIntResize(z, (index+1)))
+        return false;
+    for(size_t i = wordcount; i < index+1; i++)
       z->words[i] = 0;
     z->wordcount = index+1;
   }
-  else if(index == z->wordcount-1 && value == 0)
+  else if(index == z->wordcount-1 && value == 0 && z->wordcount > 1)
   {
-    mp_word_t *tmp = (mp_word_t*)realloc(z->words, (z->wordcount-1)*sizeof(mp_word_t));
-    if(tmp == NULL){
-      if(z->words != NULL){
-    	  free(z->words);
-    	  z->words=NULL;
-      }
-      return false;
-    }
-    z->words = tmp;
-    z->wordcount--;
-    return true;
+     return _BigIntResize(z, (z->wordcount-1));
   }
+  if(z->sign == zero && value != 0) // not zero any more
+    z->sign = positive;
   z->words[index] = value;
   return true;
 }
@@ -87,8 +71,6 @@ bool BigIntLoad(BigInteger *z, const unsigned char *data, size_t len)
 {
   /// \todo Load the byte array into the big integer.
   if(z == NULL)
-    return false;
-  if(z->words == NULL)
     return false;
   if(len == 0)
   {
@@ -106,20 +88,20 @@ bool BigIntLoad(BigInteger *z, const unsigned char *data, size_t len)
           break;
         }
   }
+  if(usedlen == 0)
+  {
+      usedlen = 1;
+      z->sign = zero;
+  }
+  else
+    z->sign = positive;
   size_t count = (int)(usedlen/4.0);
   size_t remain = usedlen%4;
-  z->sign = positive; // todo check for 0
   size_t mallcount = remain == 0 ? count :count+1;
-  z->wordcount = mallcount;
-  mp_word_t *tmp = realloc(z->words, mallcount*sizeof(mp_word_t));
-  if(tmp == NULL){
-    if(z->words != NULL){
-      free(z->words);
-      z->words=NULL;
-    }
-    return NULL;
-  }
-  z->words = tmp;
+
+
+  if(!_BigIntResize(z, mallcount))
+      return false;
   for(size_t i = 0; i < count; i++)
   {
       mp_word_t word = data[len-(i*4)-1]       | data[len-(i*4)-2] << 8 |

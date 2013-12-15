@@ -28,5 +28,6 @@ void assertMagnitude(const BigInteger *b1, const mp_word_t *words, size_t len) {
 	if(b1->wordcount != len)
 		return;
 	for (size_t i = 0; i < b1->wordcount; i++)
-		CU_ASSERT_EQUAL(b1->words[i], words[i]);
+	    CU_ASSERT_EQUAL(b1->words[i], words[i]);
+
 }

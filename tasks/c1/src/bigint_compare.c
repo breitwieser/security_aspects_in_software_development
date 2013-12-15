@@ -27,8 +27,6 @@ int BigIntCompare(const BigInteger *a, const BigInteger *b)
   ///  compare the magnitudes.
   if(a == NULL || b == NULL)
       return 0;
-  if(a->words == NULL || b->words == 0)
-      return 0;
   if(a->sign != b->sign)
   {
       if(a->sign < b->sign)

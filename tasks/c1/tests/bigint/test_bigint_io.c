@@ -396,12 +396,11 @@ void TestBigIntIOTask3(void) {
 	BigIntFree(b2);
 
 	//BigIntSetAt
-	//FIXME: handle words=NULL
 	BigInteger *b3 = BigIntAlloc();
 	free(b3->words);
 	b3->words = NULL;
 	CU_ASSERT_TRUE(BigIntSetAt(b3, 3, 0xFFFFFFFF));
-	//TODO assertMagnitude
+	assertMagnitude(b3,  (mp_word_t[]) {0, 0, 0, 0xFFFFFFFF}, 4);
 	BigIntFree(b3);
 
 	BigInteger *b4 = BigIntAlloc();
@@ -415,12 +414,12 @@ void TestBigIntIOTask3(void) {
 	static const unsigned char TEST_123456789ABCDEF[] = { 0x00, 0x01, 0x23,
 			0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF };
 
-	//FIXME: handle words=NULL
 	BigInteger *b5 = BigIntAlloc();
 	free(b5->words);
 	b5->words = NULL;
 	CU_ASSERT_TRUE(BigIntLoad(b5, TEST_123456789ABCDEF, sizeof(TEST_123456789ABCDEF)));
-	//TODO assertMagnitude
+	assertMagnitude(b5,  (mp_word_t[]) {0x89ABCDEF, 0x1234567}, 2);
+
 	BigIntFree(b5);
 
 	BigInteger *b6 = BigIntAlloc();
