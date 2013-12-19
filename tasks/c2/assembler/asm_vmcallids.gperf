@@ -1,0 +1,46 @@
+%{
+// WARNING: ONLY CHANGE THIS FILE IF YOU REALLY _KNOW_ WHAT YOU ARE DOING. ANY CHANGES
+// TO asm_vmcallids.c WILL BE LOST, WHENEVER THE FILE IS REBUILD FROM asm_callids.gperf.
+//
+/// \file
+/// \brief Virtual machine call-name lookup table for the assembler.
+///
+/// This file contains a GNU gperf generated lookup table for
+/// the virtual machine call names supported by the tinyasm assembler.
+/// The \ref AsmVmCallLookup function can be used to find
+/// an AsmVmCallInfo structure for a given string.
+///
+/// The generated keyword table is case-insensitive.
+///
+#include "assembler_imp.h"
+
+#include <string.h>
+
+// Forward declaration gperf generated internal function
+static const struct AsmVmCallInfo *AsmVmCallGperfLookup(register const char *str, register unsigned int len);
+
+// Publically visible wrapper
+const AsmVmCallInfo* AsmVmCallLookup(const char *call_name, size_t len)
+{
+  if (!call_name) {
+    return NULL;
+  }
+
+  return AsmVmCallGperfLookup(call_name, len);
+}
+%}
+%language=C
+%readonly-tables
+%ignore-case
+%compare-strncmp
+%define initializer-suffix ,255
+%omit-struct-type
+%struct-type
+%define hash-function-name AsmVmCallGperfHash
+%define lookup-function-name AsmVmCallGperfLookup
+struct AsmVmCallInfo { const char *name; uint8_t callId; };
+%%
+VM_EXIT,        VMC_EXIT,
+VM_ASSERT,      VMC_ASSERT,
+VM_READ,        VMC_READ,
+VM_WRITE,       VMC_WRITE,

@@ -1,0 +1,11 @@
+#
+# Top-level makefile for assignment C2
+#
+# WARNING: DO NOT CHANGE THIS FILE UNLESS YOU REALLY
+# KNOW WHAT YOU ARE DOING.CHANGES TO THIS FILE MAY
+# BREAK THE BUILD OF YOUR APPLICATION ON THE TEST
+# SYSTEM.
+#
+SUBDIRS = util assembler vm tests
+
+include task.mk

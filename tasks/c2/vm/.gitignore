@@ -1,0 +1,5 @@
+# Output executable
+/tinyvm
+
+# Doxygen output
+/_doc

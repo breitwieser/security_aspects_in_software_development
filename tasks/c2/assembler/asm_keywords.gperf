@@ -1,0 +1,95 @@
+%{
+// WARNING: ONLY CHANGE THIS FILE IF YOU REALLY _KNOW_ WHAT YOU ARE DOING. ANY CHANGES
+// TO asm_keywords.c WILL BE LOST, WHENEVER THE FILE IS REBUILD FROM asm_keywords.gperf.
+//
+/// \file
+/// \brief Keyword lookup table for the lexer.
+///
+/// This file contains a GNU gperf generated lookup table for
+/// the keywords supported by the tinyasm lexer.
+/// The \ref AsmLexerLookupKeyword function can be used to find
+/// a AsmKeywordInfo structure for a given string.
+///
+/// The generated keyword table is case-insensitive.
+///
+#include "assembler.h"
+#include "grammar.h"   // Lexer token codes.
+
+#include <string.h>
+
+// Forward declaration gperf generated internal function
+static const struct AsmKeywordInfo *AsmKeywordGperfLookup(register const char *str, register unsigned int len);
+
+// Publically visible wrapper
+const AsmKeywordInfo* AsmKeywordLookup(const char *keyword, size_t len)
+{
+  if (!keyword) {
+    return NULL;
+  }
+
+  return AsmKeywordGperfLookup(keyword, len);
+}
+%}
+%language=C
+%readonly-tables
+%ignore-case
+%compare-strncmp
+%define initializer-suffix ,0
+%omit-struct-type
+%struct-type
+%define hash-function-name AsmKeywordGperfHash
+%define lookup-function-name AsmKeywordGperfLookup
+struct AsmKeywordInfo { const char *name; int tokenType; };
+%%
+.function, ASM_TOKEN_DOT_FUNCTION,
+.object,   ASM_TOKEN_DOT_OBJECT,
+.end,      ASM_TOKEN_DOT_END,
+.local,    ASM_TOKEN_DOT_LOCAL,
+.byte,     ASM_TOKEN_DOT_BYTE,
+.word,     ASM_TOKEN_DOT_WORD,
+.handle,   ASM_TOKEN_DOT_HANDLE,
+.skip,     ASM_TOKEN_DOT_SKIP,
+inmutable, ASM_TOKEN_INMUTABLE,
+protected, ASM_TOKEN_PROTECTED,
+code,      ASM_TOKEN_CODE,
+data,      ASM_TOKEN_DATA,
+IMM,       ASM_TOKEN_IMM,
+HANDLE,    ASM_TOKEN_HANDLE,
+CALL,      ASM_TOKEN_CALL,
+JMP,       ASM_TOKEN_JMP,
+BT,        ASM_TOKEN_BT,
+BF,        ASM_TOKEN_BF,
+RET,       ASM_TOKEN_RET,
+POP,       ASM_TOKEN_POP,
+PEEK,      ASM_TOKEN_PEEK,
+CMPEQ,     ASM_TOKEN_CMPEQ,
+CMPNE,     ASM_TOKEN_CMPNE,
+UCMPLT,    ASM_TOKEN_UCMPLT,
+UCMPLE,    ASM_TOKEN_UCMPLE,
+UCMPGE,    ASM_TOKEN_UCMPGE,
+UCMPGT,    ASM_TOKEN_UCMPGT,
+SCMPLT,    ASM_TOKEN_SCMPLT,
+SCMPLE,    ASM_TOKEN_SCMPLE,
+SCMPGE,    ASM_TOKEN_SCMPGE,
+SCMPGT,    ASM_TOKEN_SCMPGT,
+LDVAR,     ASM_TOKEN_LDVAR,
+STVAR,     ASM_TOKEN_STVAR,
+LDW,       ASM_TOKEN_LDW,
+STW,       ASM_TOKEN_STW,
+LDB,       ASM_TOKEN_LDB,
+STB,       ASM_TOKEN_STB,
+ADD,       ASM_TOKEN_ADD,
+SUB,       ASM_TOKEN_SUB,
+MUL,       ASM_TOKEN_MUL,
+UDIV,      ASM_TOKEN_UDIV,
+SDIV,      ASM_TOKEN_SDIV,
+SHL,       ASM_TOKEN_SHL,
+SHR,       ASM_TOKEN_SHR,
+ASR,       ASM_TOKEN_ASR,
+ROR,       ASM_TOKEN_ROR,
+AND,       ASM_TOKEN_AND,
+OR,        ASM_TOKEN_OR,
+XOR,       ASM_TOKEN_XOR,
+NOT,       ASM_TOKEN_NOT,
+NEG,       ASM_TOKEN_NEG,
+VMC,       ASM_TOKEN_VMC

@@ -1,0 +1,61 @@
+//
+// Simple Hello world program
+//
+// This example program uses the VM_WRITE call to print
+// "hello world" on the VM's output stream.
+//
+
+//
+// The data object containing the hello world message
+//
+.object data inmutable hello_world_message
+ .byte (0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x57, 0x6F,
+        0x72, 0x6C, 0x64, 0x21, 0x0A, 0x00)
+.end
+
+//
+// Main program
+//
+.function main()
+ .local @index   // Current byte index
+ .local @current // Current data byte
+
+ // Initialize the byte index
+ IMM(0) STVAR(@index)
+
+ // Main byte output loop
+loop:
+
+ // Load the next byte and store it in local variable @current
+ LDVAR(@index)
+ HANDLE(hello_world_message)
+ LDB
+ STVAR(@current)
+
+ // Exit the loop (jump to loop_done) if we reached the NUL byte
+ LDVAR(@current)
+ IMM(0)
+ CMPEQ BT(loop_done)
+
+ // Current byte was not the NUL byte. Print via VM_WRITE VM call.
+ LDVAR(@current)
+ VMC(VM_WRITE)
+
+ // Increment @index by one
+ LDVAR(@index)
+ IMM(1)
+ ADD
+ STVAR(@index)
+
+ // And loop
+ JMP(loop)
+
+loop_done:
+  // Exit the program (this VM call will not return)
+  VMC(VM_EXIT)
+
+  // This code should never be reached (VM_EXIT should not return)
+  IMM(0)
+  VMC(VM_ASSERT)
+  RET
+.end

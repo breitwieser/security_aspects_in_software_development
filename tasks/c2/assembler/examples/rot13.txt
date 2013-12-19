@@ -1,0 +1,99 @@
+//
+// rot13.txt - ROT13 "encryption" with the tiny assembler
+//
+// assembler with
+//   tinyasm -o rot13.bin.be -b -v rot13.txt   # (big endian)
+//   tinyasm -o rot13.bin.le -l -v rot13.txt   # (little endian)
+//
+// run as:
+//   echo "Uryyb sebz shmml'f iveghny jbeyq." | tinyvm -qIO -i rot13.bin.be
+//   echo "Uryyb sebz shmml'f iveghny jbeyq." | tinyvm -qIO -i rot13.bin.le
+//
+
+.function main()
+ loop:
+  // Read the next character into @c
+  VMC(VM_READ)
+
+  // Duplicate top of stack, compare to 0xFFFFFFFF
+  PEEK(0) IMM(0xFFFFFFFF) CMPEQ BT(done)
+
+  // "Encrypt" the character
+  CALL(rot13)
+
+  // And print the output character
+  VMC(VM_WRITE)
+
+  // End of input?
+  JMP (loop)
+
+done:
+  // Dispose our extra copy of the character
+  POP(1)
+
+  // We are done, leave the program
+  VMC(VM_EXIT)
+.end
+
+.function(1) umod(@a, @b)
+ .local @r, @q
+
+ // q = floor(a / b)
+ LDVAR(@a) LDVAR(@b) UDIV
+ STVAR(@q)
+
+ // r = -q*b + a
+ LDVAR(@q) LDVAR(@b) MUL NEG
+ LDVAR(@a) ADD
+ STVAR(@r)
+
+ // Lets stress the stack a bit
+ IMM(0xAAAAAAAA) STVAR(@a)
+ IMM(0xBBBBBBBB) STVAR(@b)
+ IMM(0xCCCCCCCC) STVAR(@q)
+
+ // Done (return r)
+ LDVAR(@r)
+ RET
+.end
+
+.function(1) rot13(@c)
+uppercase:
+  // Is (c >= 'A') && (c <= 'Z')?
+  LDVAR(@c) IMM(65) UCMPGE
+  LDVAR(@c) IMM(90) UCMPLE
+  AND
+  BF(lowercase)
+
+  // Yes it is!
+  // c = (c - 'A' + 13) % 26 + 'A'
+  LDVAR(@c) IMM(65) SUB
+  IMM(13) ADD
+  IMM(26) CALL(umod)
+  IMM(65) ADD
+  STVAR(@c)
+
+  JMP(done)
+
+lowercase:
+  // Is (c >= 'a') && (v <= 'z')?
+  LDVAR(@c) IMM(97) UCMPGE
+  LDVAR(@c) IMM(122) UCMPLE
+  AND
+  BF(done)
+
+  // Yes it is!
+  // c = (c - 'a' + 13) % 26 + 'a'
+  LDVAR(@c) IMM(97) SUB
+  IMM(13) ADD
+  IMM(26) CALL(umod)
+  IMM(97) ADD
+  STVAR(@c)
+
+  // Lets stress JMP a bit
+  JMP(done)
+
+done:
+  LDVAR(@c)
+  RET
+.end

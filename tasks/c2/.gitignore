@@ -1,0 +1,11 @@
+# lcov coverage metrics (HTML and raw data)
+/_cov
+/_task
+
+# Compiler output
+*.o
+*.d
+
+# GCOV output
+*.gcda
+*.gcno

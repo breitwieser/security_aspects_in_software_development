@@ -1,0 +1,10 @@
+# Standalone applications
+/tinyasm
+/tinyvm
+
+# Unit test runners
+/asmtests
+/vmtests
+
+# Coverage data
+/*.info
