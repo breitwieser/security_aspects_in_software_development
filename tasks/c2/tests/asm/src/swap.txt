@@ -1,0 +1,9 @@
+//
+// Syntax parsing test for the "SWAP" instruction
+//
+// We accidentially missed "SWAP" in version 1.0 of the assignment
+// spec. This test checks just for the missing instruction.
+//
+.function func1()
+ SWAP
+.end

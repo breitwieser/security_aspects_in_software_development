@@ -1,0 +1,199 @@
+//
+// Syntax checks
+//
+// This "program" tries to exercise the valid syntax variants of
+// the parser.
+//
+
+// Empty objects with different qualifiers
+.object data empty1 .end
+.object code empty2 .end
+.object data inmutable empty3 .end
+.object code inmutable empty4 .end
+.object data protected empty5 .end
+.object code protected empty6 .end
+.object code inmutable protected empty7 .end
+.object data inmutable protected empty8 .end
+.object code protected inmutable empty9 .end
+.object data protected inmutable empty10 .end
+
+// Functions
+.function func0()
+ RET
+.end
+
+.function(0) func1()
+ RET
+.end
+
+.function(1) func2()
+ IMM(0) RET
+.end
+
+.function func3(@a)
+ RET
+.end
+
+.function func4(@a, @b)
+ RET
+.end
+
+.function(1) func5(@a, @b, @c)
+ IMM(0) RET
+.end
+
+//
+// Functions and objects with explicitly given handles
+//
+.function[0xDEADC0DE] func6()
+ RET
+.end
+
+.function[0xDEADC1DE] (1) func7()
+ IMM(0) RET
+.end
+
+.function[0xDEADC2DE] (1) func8(@a, @b, @c)
+ IMM(0) RET
+.end
+
+.object[0xDEADC3DE] code empty11
+.end
+
+// Local variables in a function
+.function func9()
+ .local @l0
+ .local @l1, @l2, @l3
+ IMM(0)
+ .local @l4
+ POP(1)
+ RET
+.end
+
+// Labels in a function
+.function func10()
+ .local @a
+
+label0:
+ IMM(0)
+
+label1:
+label2:
+ IMM(2)
+
+ POP(2)
+ RET
+.end
+
+//
+// Object initialization
+//
+
+.object data init0
+ .byte (0)                     // Single byte
+ .byte (1, 2, -3, 0xCA, -0x80) // Several bytes
+.end
+
+.object data init1
+ .word (0) // Single word
+ .word (1, 0, 0xDEADBEEF, -42) // Several words
+.end
+
+.object data init2
+ .skip (3)  // Skip 3 bytes (fill with zero)
+.end
+
+.object data init3
+ .skip (3, 0xCA) // Skip 3 bytes (fill with 0xCA)
+.end
+
+.object data init4
+ .handle (init2) // Single handle
+ .handle (0xDEADC3DE) // Explicitly given
+.end
+
+//
+// Bytecode
+//
+.function[0x12345678] (0) codetests(@arg0)
+ .local @loc0
+
+ // Constants and handles
+ IMM(123)
+ HANDLE(init2)      // init2 object
+ HANDLE(0x12345678) // codetests function via handle 0x12345678
+
+ // Calls and control flow
+ CALL(codetests)
+ CALL(0x12345678)  // codetests function via handle 0x12345678
+
+ JMP(label0)
+ BT(label0)
+ BF(label0)
+label0:
+
+ JMP(-1)           // Raw jump offset (here: infinite loop)
+ BT(-1)            // -"-
+ BF(-1)            // -"-
+ RET
+
+ // Stack manipulation
+ POP(0)            // effectively a NOP
+ POP(1)            // normal pop (with one slot)
+ PEEK(0)           // effectively a DUP
+ // SWAP           // BUG in assignemtn spec 1.0: Missing in asm_keywords.gperf
+
+ // Compares
+ CMPEQ  // a == b ?
+ CMPNE  // a != b ?
+ UCMPLT // unsigned: a < b ?
+ UCMPLE // unsigned: a <= b ?
+ UCMPGE // unsigned: a >= b ?
+ UCMPGT // unsigned: a > b ?
+ SCMPLT // signed: a < b ?
+ SCMPLE // signed: a <= b ?
+ SCMPGE // signed: a >= b ?
+ SCMPGT // signed: a > b ?
+
+ // Load and store
+ LDVAR(@arg0)
+ LDVAR(0x80)   // @arg0 via index
+ LDVAR(@loc0)
+ LDVAR(0x00)   // @loc0 via index
+
+ STVAR(@arg0)
+ STVAR(0x80)   // @arg0 via index
+ STVAR(@loc0)
+ STVAR(0x00)   // @loc0 via index
+
+ LDW // load 32-bit word
+ STW // store 32-bit word
+
+ LDB // load 8-bit byte
+ STB // store 8-bit byte
+
+ // Arithmetic
+ ADD
+ SUB
+ MUL
+ UDIV
+ SDIV
+ SHL
+ SHR
+ ASR
+ ROR
+ AND
+ OR
+ XOR
+ NOT
+ NEG
+
+ // Virtual machine calls
+ VMC(VM_EXIT)   // exit vm
+ VMC(VM_ASSERT) // bytecode assertion
+ VMC(VM_WRITE)  // write to output channel (stdout)
+ VMC(VM_READ)   // read from input channel (stdin)
+
+ VMC(0, 0)   // exit vm (group 0, call 0 = VM_EXIT)
+ VMC(15, 15) // highest possible (undefined) vm call (group 15, call 15)
+.end

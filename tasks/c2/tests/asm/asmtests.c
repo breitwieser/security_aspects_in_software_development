@@ -104,7 +104,21 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
       { "create.simple",       &TestAsmCreateSimple },
       { "delete.null",         &TestAsmDeleteNull },
       { "parse.simple",        &TestAsmParseSimple },
+      { "parse.syntax",        &TestAsmParseSyntax },
+      { "parse.syntax.swap",   &TestAsmParseSyntaxSwap },
       { "bad.oom.create",      &TestAsmBadOutOfMemoryCreate },
+      CU_TEST_INFO_NULL,
+    }
+  },
+
+  // Full assembler (assembler+link) test suite (defined in build.c)
+  {
+    .pName        = "asm/build",
+    .pInitFunc    = &TestSuiteInit,
+    .pCleanupFunc = &TestSuiteCleanup,
+    .pTests = (CU_TestInfo[]) {
+      { "build.hello", &TestAsmBuildHello },
+      { "build.arc4",  &TestAsmBuildArc4 },
       CU_TEST_INFO_NULL,
     }
   },

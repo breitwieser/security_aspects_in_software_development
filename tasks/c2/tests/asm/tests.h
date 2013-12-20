@@ -74,6 +74,11 @@ void TestLexerBadOutOfMemoryDeleteCb(void);
 void TestAsmCreateSimple(void);
 void TestAsmDeleteNull(void);
 void TestAsmParseSimple(void);
+void TestAsmParseSyntax(void);
+void TestAsmParseSyntaxSwap(void);
 void TestAsmBadOutOfMemoryCreate(void);
 
+// Unit tests for the complete assembler (defined in build.c)
+void TestAsmBuildHello(void);
+void TestAsmBuildArc4(void);
 #endif // ASSEMBLER_TESTS_H

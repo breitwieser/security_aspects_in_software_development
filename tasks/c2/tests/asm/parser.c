@@ -47,6 +47,60 @@ void TestAsmParseSimple(void)
 }
 
 //----------------------------------------------------------------------
+void TestAsmParseSyntax(void)
+{
+  // Extended parsing example (try to parse all syntactic constructs)
+  //
+  // NOTE: This parsing test omits the "SWAP" instruction, which we
+  // accidentially missed in assignment specification 1.0
+
+  // Prepare the lexer
+  size_t code_length = 0;
+  const char *code = TestGetResource(&code_length, "src/syntax.txt");
+
+  AsmLexer *lexer = AsmLexerFromString(code, code_length);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(lexer);
+
+  // And let the assembler parse the source code
+  Assembler *assembler = AsmNew(ASM_VERBOSITY_QUIET, true);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(assembler);
+
+  // And parse
+  CU_ASSERT_TRUE(AsmParse(assembler, lexer));
+  CU_ASSERT_EQUAL(AsmGetErrorCount(assembler), 0);
+
+  // Dispose the objects
+  AsmDelete(assembler);
+  AsmLexerDelete(lexer);
+}
+
+//----------------------------------------------------------------------
+void TestAsmParseSyntaxSwap(void)
+{
+  // Extended parsing example, to just test the "SWAP" instruction,
+  // which we initially missed in assignment specification 1.0.
+
+  // Prepare the lexer
+  size_t code_length = 0;
+  const char *code = TestGetResource(&code_length, "src/swap.txt");
+
+  AsmLexer *lexer = AsmLexerFromString(code, code_length);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(lexer);
+
+  // And let the assembler parse the source code
+  Assembler *assembler = AsmNew(ASM_VERBOSITY_QUIET, true);
+  CU_ASSERT_PTR_NOT_NULL_FATAL(assembler);
+
+  // And parse
+  CU_ASSERT_TRUE(AsmParse(assembler, lexer));
+  CU_ASSERT_EQUAL(AsmGetErrorCount(assembler), 0);
+
+  // Dispose the objects
+  AsmDelete(assembler);
+  AsmLexerDelete(lexer);
+}
+
+//----------------------------------------------------------------------
 void TestAsmBadOutOfMemoryCreate(void)
 {
   // Let next malloc allocation fail
