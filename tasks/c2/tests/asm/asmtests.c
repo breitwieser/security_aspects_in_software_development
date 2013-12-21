@@ -42,6 +42,7 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
       { "bad.append.null",     &TestBufferBadAppendNull },
       { "bad.append.overflow", &TestBufferBadAppendOverflow },
       { "bad.oom.single",      &TestBufferBadOutOfMemorySingle },
+      { "buffer.remaining",    &TestBufferRemaining},
       CU_TEST_INFO_NULL,
     }
   },

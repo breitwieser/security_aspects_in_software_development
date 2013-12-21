@@ -35,6 +35,7 @@ void TestBufferBadGettersNull(void);
 void TestBufferBadAppendNull(void);
 void TestBufferBadAppendOverflow(void);
 void TestBufferBadOutOfMemorySingle(void);
+void TestBufferRemaining(void);
 
 // Unit tests for the lexical analyser (defined in lexer.c)
 void TestLexerCreateStrSimple(void);

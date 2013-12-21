@@ -19,6 +19,8 @@
 // Implementation details of your byte buffer.
 struct Buffer {
   /// \todo Add the implementation details of your byte buffer.
+	unsigned char* data;
+	size_t len;
 };
 
 /// \todo Add your own private helper functions, constants, ...
