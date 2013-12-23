@@ -108,6 +108,52 @@ static int VmcWrite(VmContext *vm, uint32_t pc)
 }
 
 //----------------------------------------------------------------------
+static int VmcAlloc(VmContext *vm, uint32_t pc)
+{
+  uint32_t size;
+  if (!VmStackPop(&size, vm, 1)) {
+    VmLogError(vm, "vmc: pc:0x%08x: alloc: failed to get object size.",
+               (unsigned) pc);
+    return -1;
+  }
+
+  // Search for a free object handle
+  assert (VM_DYNAMIC_HANDLE_LAST < UINT32_MAX);
+
+  uint32_t handle;
+  for (handle = VM_DYNAMIC_HANDLE_FIRST; handle <= VM_DYNAMIC_HANDLE_LAST; ++handle) {
+    if (!VmGetObject(vm, handle)) {
+      break;
+    }
+  }
+
+  if (handle == VM_DYNAMIC_HANDLE_LAST + 1) {
+    VmLogError(vm, "vmc: pc:0x%08x: alloc: out of dynamic object handles.",
+               (unsigned) pc);
+    return -1;
+  }
+
+  // And allocate
+  if (!VmCreateObject(vm, handle, VM_QUALIFIER_DATA, NULL, size)) {
+    VmLogError(vm, "vmc: pc:0x%08x: alloc: failed to dynamically allocate %u byte.",
+               (unsigned) pc, (unsigned) size);
+    return -1;
+  }
+
+  VmLogDebug(vm, "vmc: pc:0x%08x: alloc: new object 0x%08x: size:%u",
+             (unsigned) pc, (unsigned) handle, (unsigned) size);
+
+  // Push the new handle
+  if (!VmStackPush(vm, &handle, 1)) {
+    VmLogError(vm, "vmc: pc:0x%08x: alloc: failed to push the result handle.",
+               (unsigned) pc);
+    return -1;
+  }
+
+  return 0;
+}
+
+//----------------------------------------------------------------------
 int VmBcVmc(VmContext *vm, uint32_t pc, uint32_t imm)
 {
   int result;
@@ -117,6 +163,7 @@ int VmBcVmc(VmContext *vm, uint32_t pc, uint32_t imm)
   case VMC_ASSERT: result = VmcAssert(vm, pc); break;
   case VMC_READ: result = VmcRead(vm, pc); break;
   case VMC_WRITE: result = VmcWrite(vm, pc); break;
+  case VMC_ALLOC: result = VmcAlloc(vm, pc); break;
 
   default:
     VmLogError(vm, "vmc: unimplemented virtual machine call 0x%08x",
