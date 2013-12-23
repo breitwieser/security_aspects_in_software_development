@@ -117,7 +117,7 @@ int VmBcImm32(VmContext *vm, uint32_t pc, uint32_t imm)
 int VmBcHandle(VmContext *vm, uint32_t pc, uint32_t imm)
 {
   // Sanity check: Are we loading a valid handle?
-  if (!VmGetObject(vm, imm)) {
+  if (imm != VM_NULL_HANDLE && !VmGetObject(vm, imm)) {
     VmLogError(vm, "bc: handle: refusing to load undefined handle 0x%08x",
                (unsigned) imm);
     return -1;
