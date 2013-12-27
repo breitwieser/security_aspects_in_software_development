@@ -47,6 +47,17 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     }
   },
 
+  // Buffer handling tests suite (defined in memview.c)
+  {
+    .pName        = "asm/memview",
+    .pInitFunc    = &TestSuiteInit,
+    .pCleanupFunc = &TestSuiteCleanup,
+    .pTests = (CU_TestInfo[]) {
+      { "create.simple",       &TestMemViewCreateSimple  },
+      CU_TEST_INFO_NULL,
+    }
+  },
+
   // Lexical scanner tests suite (defined in lexer.c)
   {
     .pName        = "asm/lexer",

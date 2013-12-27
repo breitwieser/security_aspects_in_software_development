@@ -21,6 +21,10 @@ void TestTokenBadGettersNull(void);
 void TestTokenBadDeleteNull(void);
 void TestTokenOutOfMemory(void);
 
+
+// Unit tests for memview handling (defined in memview.c)
+void TestMemViewCreateSimple(void);
+
 // Unit tests for buffer handling (defined in buffer.c)
 void TestBufferCreateSimple(void);
 void TestBufferClearZero(void);
