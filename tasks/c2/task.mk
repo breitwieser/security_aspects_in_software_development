@@ -58,7 +58,7 @@ VGR_RUNTEST_ARGS ?= -b
 valgrind-runtests:
 	$(MAKE) CONFIGURATION=debug clean all
 	@echo "==== Starting testsuite under valgrind ===="
-	valgrind $(VG_FLAGS) ./bin/asmtests $(VG_RUNTEST_ARGS)
+	valgrind $(VG_FLAGS) ./bin/vmtests $(VG_RUNTEST_ARGS)
 
 #----------------------------------------------------------------------
 # Extra rules for LCOV

@@ -8,13 +8,72 @@
 bool VmStackPush(VmContext *vm, const uint32_t *values, size_t count)
 {
   /// \todo Implement your stack push operation
-  return false;
+	if(!vm){
+		return false;
+	}
+	if(count == 0){
+		return true;
+	}
+
+	size_t new_size = vm->stack_size + count;
+	//overflow check
+	if(SIZE_MAX - count < vm->stack_size){
+		return false;
+	}
+
+	//overflow check
+	if(SIZE_MAX / new_size < sizeof(uint32_t))
+		return false;
+	uint32_t *tmp = (uint32_t*) realloc(vm->stack, new_size * sizeof(uint32_t));
+	if(!tmp){
+		return false;
+	}
+	vm->stack = tmp;
+
+	uint32_t* start_p = vm->stack_size==0 ? vm->stack : vm->stack+vm->stack_size-1;
+	if(values){
+		memcpy(start_p, values, count);
+	}else{
+		while(count--){
+			start_p[count] = 0;
+		}
+	}
+	vm->stack_size = new_size;
+	return true;
 }
 
 //----------------------------------------------------------------------
 bool VmStackPop(uint32_t *values, VmContext *vm, size_t count)
 {
   /// \todo Implement your stack push operation
+	if(!vm){
+		return false;
+	}
+
+	if(count > vm->stack_size){
+		return false;
+	}
+
+	if(count==0){
+		return true;
+	}
+
+	//copy values
+	uint32_t* start_p = vm->stack+vm->stack_size-1;
+	if(values){
+		for(size_t i=0;i<=count;i++){
+			values[i] = *(start_p-i);
+		}
+	}
+
+	//shrink stack
+	uint32_t *tmp = (uint32_t*) realloc(vm->stack, (vm->stack_size-count) * sizeof(uint32_t));
+	if(!tmp){
+		return false;
+	}
+	vm->stack = tmp;
+	vm->stack_size = vm->stack_size-count;
+
   return false;
 }
 
@@ -22,7 +81,10 @@ bool VmStackPop(uint32_t *values, VmContext *vm, size_t count)
 size_t VmStackGetUsage(VmContext *vm)
 {
   /// \todo Implement your stack usage function.
-  return 0;
+	if(!vm){
+		return 0;
+	}
+	return vm->stack_size;
 }
 
 //----------------------------------------------------------------------
@@ -30,7 +92,13 @@ uint32_t* VmStackAt(VmContext *vm, size_t index)
 {
   /// \todo Implement your stack "peek" function.
   ///  (note that index=0 is the bottom of the stack)
-  return NULL;
+	if(!vm){
+		return NULL;
+	}
+	if(index < vm->stack_size){
+		return (vm->stack+index);
+	}
+	return NULL;
 }
 
 

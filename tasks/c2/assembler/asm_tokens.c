@@ -47,9 +47,7 @@ AsmToken* AsmTokenNew(int type, unsigned line, unsigned column,
 		free(token);
 		return NULL;
 	}
-	if(text_len != 0){
-		memcpy(token->data, text, text_len);
-	}
+	memcpy(token->data, text, text_len);
 	token->data[text_len] = '\0';
 
 	return token;
@@ -77,8 +75,15 @@ int AsmTokenGetType(const AsmToken *token) {
 //----------------------------------------------------------------------
 const char* AsmTokenGetText(const AsmToken *token) {
 	/// \todo Add your own implementation.
-	if (token == NULL)
+	if (token == NULL || (token->data == NULL && token->len!=0))
 		return NULL;
+//	if(token->data ==NULL && token->len==0)
+//	{
+//		token->data = (char*) malloc(sizeof(char));
+//		if(token->data == NULL)
+//			return NULL;
+//		token->data[0] = '\0';
+//	}
 	return token->data;
 }
 

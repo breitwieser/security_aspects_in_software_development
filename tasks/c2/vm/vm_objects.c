@@ -11,7 +11,52 @@ bool VmCreateObject(VmContext *vm, uint32_t handle, VmQualifiers qualifiers,
 {
   /// \todo Add your implementation of the object creation function
   ///       here.
-  return false;
+	if(!vm || !qualifiers || (!content && length != 0) || handle == VM_NULL_HANDLE) {
+		return false;
+	}
+
+	//does object with the same handle already exist?
+	if(!VmGetObject(vm, handle)){
+		return false;
+	}
+
+	//create object
+	VmObject* o = (VmObject*) malloc(sizeof(VmObject));
+	if(!o)
+		return false;
+
+	Buffer* b = BufferCreate();
+	if(!b){
+		free(o);
+		return false;
+	}
+	if(!BufferAppend(b, content, length)){
+		free(b);
+		free(o);
+		return false;
+	}
+
+	o->buffer=b;
+	o->parent=vm;
+	o->handle=handle;
+	o->qualifiers=qualifiers;
+
+	//alloc memory in vmcontext to store object
+	if (SIZE_MAX - 1 < vm->objs_size || SIZE_MAX / sizeof(VmObject*) < vm->objs_size + 1) {
+		return false;
+	}
+	VmObject **tmp = (VmObject**) realloc(vm->objs, (vm->objs_size + 1) * sizeof(VmObject*));
+	if (!tmp) {
+		free(b);
+		free(o);
+		return false;
+	}
+	vm->objs = tmp;
+	vm->objs_size++;
+
+	vm->objs[vm->objs_size-1] = o;
+
+  return true;
 }
 
 //----------------------------------------------------------------------
@@ -38,5 +83,8 @@ VmContext* VmGetContext(VmObject *obj)
 bool VmAccessObject(MemView *view, VmObject *obj)
 {
   /// \todo Add your own implementation here.
-  return false;
+	if(!obj || !view){
+		return false;
+	}
+	return MemInit(view, MEM_VIEW_NORMAL, obj->buffer, 0, BufferGetLength(obj->buffer));
 }
