@@ -30,13 +30,13 @@ bool VmStackPush(VmContext *vm, const uint32_t *values, size_t count)
 	}
 	vm->stack = tmp;
 
-	uint32_t* start_p = vm->stack_size==0 ? vm->stack : vm->stack+vm->stack_size-1;
+	uint32_t* start_p = vm->stack_size==0 ? vm->stack : vm->stack+vm->stack_size;
 	if(values){
-		memcpy(start_p, values, count);
+		for(size_t i = 0; i < count; i++)
+			start_p[i] = values[i];
 	}else{
-		while(count--){
-			start_p[count] = 0;
-		}
+	    for(size_t i = 0; i < count; i++)
+			start_p[i] = 0;
 	}
 	vm->stack_size = new_size;
 	return true;
@@ -61,7 +61,7 @@ bool VmStackPop(uint32_t *values, VmContext *vm, size_t count)
 	//copy values
 	uint32_t* start_p = vm->stack+vm->stack_size-1;
 	if(values){
-		for(size_t i=0;i<=count;i++){
+		for(size_t i=0;i < count;i++){
 			values[i] = *(start_p-i);
 		}
 	}
@@ -74,7 +74,7 @@ bool VmStackPop(uint32_t *values, VmContext *vm, size_t count)
 	vm->stack = tmp;
 	vm->stack_size = vm->stack_size-count;
 
-  return false;
+  return true;
 }
 
 //----------------------------------------------------------------------

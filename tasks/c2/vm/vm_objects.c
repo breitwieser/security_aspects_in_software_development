@@ -16,7 +16,7 @@ bool VmCreateObject(VmContext *vm, uint32_t handle, VmQualifiers qualifiers,
 	}
 
 	//does object with the same handle already exist?
-	if(!VmGetObject(vm, handle)){
+	if(VmGetObject(vm, handle) != NULL){
 		return false;
 	}
 
@@ -40,6 +40,7 @@ bool VmCreateObject(VmContext *vm, uint32_t handle, VmQualifiers qualifiers,
 	o->parent=vm;
 	o->handle=handle;
 	o->qualifiers=qualifiers;
+	o->big_endian=false;
 
 	//alloc memory in vmcontext to store object
 	if (SIZE_MAX - 1 < vm->objs_size || SIZE_MAX / sizeof(VmObject*) < vm->objs_size + 1) {
@@ -86,5 +87,5 @@ bool VmAccessObject(MemView *view, VmObject *obj)
 	if(!obj || !view){
 		return false;
 	}
-	return MemInit(view, MEM_VIEW_NORMAL, obj->buffer, 0, BufferGetLength(obj->buffer));
+	return MemInit(view, obj->big_endian ? MEM_VIEW_BIGENDIAN : MEM_VIEW_NORMAL, obj->buffer, 0, BufferGetLength(obj->buffer));
 }

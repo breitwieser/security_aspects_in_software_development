@@ -155,6 +155,7 @@ struct VmObject
   /// \todo Add the fields specific to your implementation here.
 
   Buffer* buffer;
+  bool big_endian;
 };
 
 /// \todo Add your own helper functions, data structures, constants, ...
