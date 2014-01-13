@@ -9,7 +9,7 @@
 INCLUDES  = ../../assembler ../common
 
 PROGRAM   = asmtests.c
-SOURCES   = tokens.c buffer.c lexer.c parser.c build.c
+SOURCES   = tokens.c buffer.c memview.c lexer.c parser.c build.c
 LIBS      = assembler util testing cunit
 
 # Resource files (text and binary) to be embedded
