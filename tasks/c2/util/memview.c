@@ -10,7 +10,7 @@ bool MemInit(MemView *view, MemViewFlags flags,
 {
   if(view == NULL || buffer == NULL)
     return false;
-  if(BufferGetLength(buffer) <= base + length)
+  if(BufferGetLength(buffer) < base + length)
     return false;
   view->flags = flags;
   view->buffer = buffer;
@@ -99,9 +99,9 @@ bool MemGetHalf(uint16_t *z, MemView *view, size_t offset)
   if(c == NULL)
     return false;
   if(MemIsBigEndian(view))
-    *z = (*c) | *(c+1) << 8;
-  else
     *z = (*c) << 8 | *(c+1);
+  else
+    *z = (*c) | *(c+1) << 8;
   return true;
 }
 
@@ -115,13 +115,13 @@ bool MemSetHalf(MemView *view, size_t offset, uint16_t value)
     return false;
   if(MemIsBigEndian(view))
   {
-    *c = (uint8_t)value;
-    *(c+1) = (value & (255 << 8)) >> 8;
+    *c = (value & (255 << 8)) >> 8;
+    *(c+1) = value;
   }
   else
   {
-    *c = (value & (255 << 8)) >> 8;
-    *(c+1) = value;
+    *c = (uint8_t)value;
+    *(c+1) = (value & (255 << 8)) >> 8;
   }
   return true;
 }
@@ -133,9 +133,9 @@ bool MemGetWord(uint32_t *z, MemView *view, size_t offset)
   if(c == NULL)
     return false;
   if(MemIsBigEndian(view))
-    *z = (*c) | *(c+1) << 8 | *(c+2) << 16 | *(c+3) << 24;
+    *z = (*c) << 24 | *(c+1) << 16 | *(c+2) << 8 | *(c+3);
   else
-    *z = (*c) << 24 | (*c+1) << 16 | (*c+2) << 8 | *(c+3);
+    *z = (*c) | *(c+1) << 8 | *(c+2) << 16 | *(c+3) << 24;
   return true;
 }
 
@@ -149,17 +149,17 @@ bool MemSetWord(MemView *view, size_t offset, uint32_t value)
     return false;
   if(MemIsBigEndian(view))
   {
-    *c     = (value);
-    *(c+1) = (value & (255 << 8)) >> 8;
-    *(c+2) = (value & (255 << 16)) >> 16;
-    *(c+3) = (value & (255 << 24)) >> 24;
-  }
-  else
-  {
     *c     = (value & (255 << 24)) >> 24;
     *(c+1) = (value & (255 << 16)) >> 16;
     *(c+2) = (value & (255 << 8)) >> 8;
     *(c+3) = (value);
+  }
+  else
+  {
+    *c     = (value);
+    *(c+1) = (value & (255 << 8)) >> 8;
+    *(c+2) = (value & (255 << 16)) >> 16;
+    *(c+3) = (value & (255 << 24)) >> 24;
   }
   return true;
 }
