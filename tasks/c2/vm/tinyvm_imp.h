@@ -134,6 +134,7 @@ struct VmContext
 
   uint32_t *stack;
   size_t stack_size;
+  size_t max_stack;
 
   VmObject **objs;
   size_t objs_size;

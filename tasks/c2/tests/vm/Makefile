@@ -9,7 +9,7 @@
 INCLUDES  = ../../vm ../common
 
 PROGRAM   = vmtests.c
-SOURCES   = exec.c
+SOURCES   = exec.c security_tests.c
 LIBS      = vm util testing cunit
 
 # Test resources

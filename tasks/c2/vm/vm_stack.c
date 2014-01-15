@@ -17,21 +17,22 @@ bool VmStackPush(VmContext *vm, const uint32_t *values, size_t count)
 
 	size_t new_size = vm->stack_size + count;
 	//overflow check
-	if(SIZE_MAX - count < vm->stack_size){
+	if(SIZE_MAX - count < vm->stack_size || new_size>vm->max_stack){
 		return false;
 	}
 
 	//overflow check
-	if(SIZE_MAX / new_size < sizeof(uint32_t))
-		return false;
-	uint32_t *tmp = (uint32_t*) realloc(vm->stack, new_size * sizeof(uint32_t));
-	if(!tmp){
-		return false;
-	}
-	vm->stack = tmp;
+//	if(SIZE_MAX / new_size < sizeof(uint32_t))
+//		return false;
+//	uint32_t *tmp = (uint32_t*) realloc(vm->stack, new_size * sizeof(uint32_t));
+//	if(!tmp){
+//		return false;
+//	}
+//	vm->stack = tmp;
 
-	uint32_t* start_p = vm->stack_size==0 ? vm->stack : vm->stack+vm->stack_size;
+	uint32_t* start_p = vm->stack+vm->stack_size;
 	if(values){
+		//printf("values pointer %p\n", values);
 		for(size_t i = 0; i < count; i++)
 			start_p[i] = values[i];
 	}else{
@@ -67,11 +68,11 @@ bool VmStackPop(uint32_t *values, VmContext *vm, size_t count)
 	}
 
 	//shrink stack
-	uint32_t *tmp = (uint32_t*) realloc(vm->stack, (vm->stack_size-count) * sizeof(uint32_t));
-	if(!tmp){
-		return false;
-	}
-	vm->stack = tmp;
+//	uint32_t *tmp = (uint32_t*) realloc(vm->stack, (vm->stack_size-count) * sizeof(uint32_t));
+//	if(!tmp){
+//		return false;
+//	}
+//	vm->stack = tmp;
 	vm->stack_size = vm->stack_size-count;
 
   return true;

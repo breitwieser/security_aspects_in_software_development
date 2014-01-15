@@ -1,0 +1,22 @@
+//
+// SDIV by Overflow Test
+//
+// Tests if this program fails gracefully
+//
+
+//
+// Main program
+//
+.function main()
+  IMM(-2147483648)
+  IMM(-1)
+  SDIV
+
+  // Exit the program (this VM call will not return)
+  VMC(VM_EXIT)
+
+  // This code should never be reached (VM_EXIT should not return)
+  IMM(0)
+  VMC(VM_ASSERT)
+  RET
+.end

@@ -31,8 +31,17 @@ VmContext* VmCreate(size_t max_stack, void *appdata,
   vm->fp = 0;
 
   /// \todo Add your own initialization code
-  vm->stack=NULL;
+  if(SIZE_MAX / max_stack < sizeof(uint32_t)){
+	  free(vm);
+	  return NULL;
+  }
+  vm->stack= (uint32_t*) malloc(max_stack*sizeof(uint32_t));
+  if(!vm->stack){
+	  free(vm);
+	  return NULL;
+  }
   vm->stack_size=0;
+  vm->max_stack=max_stack;
 
   vm->objs=NULL;
   vm->objs_size=0;
@@ -65,6 +74,8 @@ void VmDelete(VmContext *vm)
 		  for(size_t i = 0; i < vm->objs_size; i++)
 		  {
 			  if(vm->objs[i]){
+				  BufferFree(vm->objs[i]->buffer);
+				  vm->objs[i]->buffer = NULL;
 				  free(vm->objs[i]);
 			  }
 		  }

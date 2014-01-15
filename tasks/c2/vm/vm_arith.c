@@ -196,6 +196,11 @@ int VmBcUDiv(VmContext *vm, uint32_t pc, uint32_t imm)
   /// \todo Add to missing checks, to prevent this bytecode from crashing
   ///   the virtual machine for certain inputs. (let the function
   ///   gracefully fail with -1 if you encounter such problematic inputs)
+  if(b==0){
+	  VmLogError(vm, "bc: udiv: division by 0 detected.");
+	  return -1;
+  }
+
   uint32_t z = a / b;
 
   if (!VmStackPush(vm, &z, 1)) {
@@ -221,6 +226,14 @@ int VmBcSDiv(VmContext *vm, uint32_t pc, uint32_t imm)
   ///
   /// Note: In comparison to VmBcUDiv there is at least one more input
   /// which causes problems
+  if(b==0){
+  	  VmLogError(vm, "bc: sdiv: division by 0 detected.");
+  	  return -1;
+  }else if(a==INT32_MIN && b == -1){
+  	  VmLogError(vm, "bc: sdiv: division overflow detected (INT32_MIN/-1.");
+	  return -1;
+  }
+
   int32_t z = a / b;
 
   if (!VmStackPush(vm, (uint32_t *) &z, 1)) {

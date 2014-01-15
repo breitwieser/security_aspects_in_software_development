@@ -88,7 +88,7 @@ int VmBcStVar(VmContext *vm, uint32_t pc, uint32_t imm)
 }
 
 //----------------------------------------------------------------------
-static bool VmDerefObject(MemView *view, size_t *offset, VmContext *vm)
+static VmObject* VmDerefObject(MemView *view, size_t *offset, VmContext *vm)
 {
   assert (view != NULL);
   assert (offset != NULL);
@@ -98,22 +98,22 @@ static bool VmDerefObject(MemView *view, size_t *offset, VmContext *vm)
   uint32_t args[2];
   if (!VmStackPop(args, vm, 2)) {
     VmLogError(vm, "bc: deref: failed to load handle and/or index from stack");
-    return false;
+    return NULL;
   }
 
   // Dereference the handle (in args[0]) to an object
-  VmObject *obj = VmGetObject(vm, args[0]);
+  VmObject*obj = VmGetObject(vm, args[0]);
   if (!obj) {
     VmLogError(vm, "bc: deref: failed to resolve handle 0x%08x",
                (unsigned) args[0]);
-    return false;
+    return NULL;
   }
 
   // Setup the memory view for the object
   if (!VmAccessObject(view, obj)) {
     VmLogError(vm, "bc: deref: failed to access object 0x%08x (native: %p)",
                (unsigned) args[0], (void *) obj);
-    return false;
+    return NULL;
   }
 
   // Our offset is the index from the stack
@@ -121,7 +121,7 @@ static bool VmDerefObject(MemView *view, size_t *offset, VmContext *vm)
 
   VmLogDebug(vm, "bc: deref: dereferenced object 0x%08x (native: %p)",
              (unsigned) args[0], (void *) obj);
-  return true;
+  return obj;
 }
 
 //----------------------------------------------------------------------
@@ -131,7 +131,8 @@ static int VmLd(VmContext *vm, bool word)
   // Dereference the object
   MemView view;
   size_t offset;
-  if (!VmDerefObject(&view, &offset, vm)) {
+  VmObject *obj;
+  if (!(obj=VmDerefObject(&view, &offset, vm))) {
     VmLogError(vm, "bc: ld: failed to dereference source object");
     return -1;
   }
@@ -139,6 +140,10 @@ static int VmLd(VmContext *vm, bool word)
   /// \todo Bytecode programs should not be able to read the content
   /// of access protected objects. (objects with a VM_QUALIFIER_PROTECTED
   ///  qualifier)
+  if((obj->qualifiers & VM_QUALIFIER_PROTECTED) == VM_QUALIFIER_PROTECTED){
+	VmLogError(vm, "bc: ld: failed; object is protected");
+	return -1;
+  }
 
   // Load the value
   uint32_t value = 0;
@@ -179,7 +184,8 @@ static int VmSt(VmContext *vm, bool word)
   // Dereference the object
   MemView view;
   size_t offset;
-  if (!VmDerefObject(&view, &offset, vm)) {
+  VmObject *obj;
+  if (!(obj=VmDerefObject(&view, &offset, vm))) {
     VmLogError(vm, "bc: st: failed to dereference source object");
     return -1;
   }
@@ -187,6 +193,10 @@ static int VmSt(VmContext *vm, bool word)
   /// \todo Bytecode programs should not be able to write the content
   /// of inmutable objects. (objects with a VM_QUALIFIER_INMUTABLE
   /// qualifier)
+  if((obj->qualifiers & VM_QUALIFIER_INMUTABLE) == VM_QUALIFIER_INMUTABLE){
+  	VmLogError(vm, "bc: st: failed; cannot write to object -  object is inmutable");
+  	return -1;
+  }
 
   // Get the value to store
   uint32_t value;

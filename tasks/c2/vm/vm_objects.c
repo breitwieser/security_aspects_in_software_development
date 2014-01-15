@@ -87,5 +87,8 @@ bool VmAccessObject(MemView *view, VmObject *obj)
 	if(!obj || !view){
 		return false;
 	}
-	return MemInit(view, obj->big_endian ? MEM_VIEW_BIGENDIAN : MEM_VIEW_NORMAL, obj->buffer, 0, BufferGetLength(obj->buffer));
+	MemViewFlags flags = 0;
+	flags |= obj->big_endian ? MEM_VIEW_BIGENDIAN : MEM_VIEW_NORMAL;
+	flags |= obj->qualifiers == VM_QUALIFIER_CODE || obj->qualifiers == VM_QUALIFIER_INMUTABLE || obj->qualifiers == VM_QUALIFIER_PROTECTED ? MEM_VIEW_READONLY : 0;
+	return MemInit(view, flags, obj->buffer, 0, BufferGetLength(obj->buffer));
 }
