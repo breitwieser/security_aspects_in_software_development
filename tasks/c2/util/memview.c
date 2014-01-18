@@ -8,9 +8,11 @@
 bool MemInit(MemView *view, MemViewFlags flags,
              Buffer *buffer, size_t base, size_t length)
 {
-  if(view == NULL || buffer == NULL)
+  if(view == NULL || buffer == NULL || length==0)
     return false;
-  if(BufferGetLength(buffer) < base + length)
+  if((flags & MEM_VIEW_RESERVED) == MEM_VIEW_RESERVED)
+	  return false;
+  if(SIZE_MAX - base < length || BufferGetLength(buffer) < base + length)
     return false;
   view->flags = flags;
   view->buffer = buffer;
@@ -67,34 +69,59 @@ bool MemSetBigEndian(MemView *view, bool enable)
 //----------------------------------------------------------------------
 unsigned char* MemGetBytes(MemView *view, size_t offset, size_t length)
 {
-  return BufferGetBytes(view->buffer, view->base+offset, length);
+	if (!view) {
+	    return NULL;
+	}
+	//detect MemView overflow
+	if(length>view->length)
+		return NULL;
+	//detect overflow
+	if(view->base > view->base + offset)
+		return NULL;
+	return BufferGetBytes(view->buffer, view->base+offset, length);
 }
 
 //----------------------------------------------------------------------
 bool MemGetByte(uint8_t *z, MemView *view, size_t offset)
 {
-  uint8_t* c = BufferGetBytes(view->buffer, view->base+offset, 1);
-  if(c == NULL)
-    return false;
-  *z = *c;
-  return true;
+	if (!view || z==NULL) {
+	    return false;
+	}
+	//detect overflow
+	if (view->base > view->base + offset)
+		return false;
+	uint8_t* c = BufferGetBytes(view->buffer, view->base + offset, 1);
+	if (c == NULL)
+		return false;
+	*z = *c;
+	return true;
 }
 
 //----------------------------------------------------------------------
 bool MemSetByte(MemView *view, size_t offset, uint8_t value)
 {
-  if(MemIsReadOnly(view))
-    return false;
-  uint8_t* c = BufferGetBytes(view->buffer, view->base+offset, 1);
-  if(c == NULL)
-    return false;
-  *c = value;
-  return true;
+	if (!view || MemIsReadOnly(view))
+		return false;
+	//detect overflow
+	if (view->base > view->base + offset)
+		return false;
+	uint8_t* c = BufferGetBytes(view->buffer, view->base + offset, 1);
+	if (c == NULL)
+		return false;
+	*c = value;
+	return true;
 }
 
 //----------------------------------------------------------------------
 bool MemGetHalf(uint16_t *z, MemView *view, size_t offset)
 {
+	if (!view || !z)
+		return false;
+	//detect overflow
+	if (view->base > view->base + offset)
+		return false;
+	if(view->length<2)
+		return false;
   uint8_t* c = BufferGetBytes(view->buffer, view->base+offset, 2);
   if(c == NULL)
     return false;
@@ -108,6 +135,13 @@ bool MemGetHalf(uint16_t *z, MemView *view, size_t offset)
 //----------------------------------------------------------------------
 bool MemSetHalf(MemView *view, size_t offset, uint16_t value)
 {
+	if (!view)
+		return false;
+	//detect overflow
+	if (view->base > view->base + offset)
+		return false;
+	if (view->length < 2)
+		return false;
   if(MemIsReadOnly(view))
     return false;
   uint8_t* c = BufferGetBytes(view->buffer, view->base+offset, 2);
@@ -129,6 +163,13 @@ bool MemSetHalf(MemView *view, size_t offset, uint16_t value)
 //----------------------------------------------------------------------
 bool MemGetWord(uint32_t *z, MemView *view, size_t offset)
 {
+	if (!view || !z)
+		return false;
+	//detect overflow
+	if (view->base > view->base + offset)
+		return false;
+	if (view->length < 4)
+		return false;
   uint8_t* c = BufferGetBytes(view->buffer, view->base+offset, 4);
   if(c == NULL)
     return false;
@@ -142,9 +183,16 @@ bool MemGetWord(uint32_t *z, MemView *view, size_t offset)
 //----------------------------------------------------------------------
 bool MemSetWord(MemView *view, size_t offset, uint32_t value)
 {
+	if (!view)
+		return false;
+	//detect overflow
+	if (view->base > view->base + offset)
+		return false;
+	if (view->length < 4)
+		return false;
   if(MemIsReadOnly(view))
     return false;
-  uint8_t* c = BufferGetBytes(view->buffer, view->base+offset, 2);
+  uint8_t* c = BufferGetBytes(view->buffer, view->base+offset, 4);
   if(c == NULL)
     return false;
   if(MemIsBigEndian(view))

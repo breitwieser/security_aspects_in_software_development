@@ -229,6 +229,9 @@ int VmBcSDiv(VmContext *vm, uint32_t pc, uint32_t imm)
   if(b==0){
   	  VmLogError(vm, "bc: sdiv: division by 0 detected.");
   	  return -1;
+  // explanation: why INT_MIN/-1 will overflow
+  // let's assume an int is 8bit long -> signed int: -128 -> 127
+  // -128/-1 -> 128: can't be stored in an 8bit integer
   }else if(a==INT32_MIN && b == -1){
   	  VmLogError(vm, "bc: sdiv: division overflow detected (INT32_MIN/-1.");
 	  return -1;

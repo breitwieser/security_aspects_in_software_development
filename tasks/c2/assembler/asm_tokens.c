@@ -77,13 +77,6 @@ const char* AsmTokenGetText(const AsmToken *token) {
 	/// \todo Add your own implementation.
 	if (token == NULL || (token->data == NULL && token->len!=0))
 		return NULL;
-//	if(token->data ==NULL && token->len==0)
-//	{
-//		token->data = (char*) malloc(sizeof(char));
-//		if(token->data == NULL)
-//			return NULL;
-//		token->data[0] = '\0';
-//	}
 	return token->data;
 }
 

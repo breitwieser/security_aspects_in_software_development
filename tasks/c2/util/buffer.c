@@ -28,6 +28,7 @@ void BufferFree(Buffer* buffer)
 		if(buffer->data != NULL)
 		{
 			free(buffer->data);
+			buffer->data=NULL;
 		}
 		free(buffer);
 	}
@@ -51,24 +52,24 @@ bool BufferAppend(Buffer* buffer, const void *data, size_t len)
 
 	// is data subslice of buffer?
 	size_t offset=0;
-	unsigned char *buf_last_el = buffer->data+buffer->len-1;
-	//overflow
-	if(buf_last_el < buffer->data)
-		return false;
-	if(buffer->data != NULL && buffer->data <= c_data && buf_last_el >= c_data)
-	{
-		//data start pointer lies within buffer boundaries
-		//check if data+len is inside the buffer
-		unsigned char *data_last_el = c_data+len-1;
-		// overflow?
-		if(data_last_el  < c_data)
+	if (buffer->data != NULL) {
+		unsigned char *buf_last_el = buffer->data + buffer->len - 1;
+		//overflow
+		if (buf_last_el < buffer->data)
 			return false;
-		if(buf_last_el < data_last_el)
-		{
-			//data starts within buffer but exceeds buffer boundaries
-			return false;
+		if (buffer->data <= c_data && buf_last_el >= c_data) {
+			//data start pointer lies within buffer boundaries
+			//check if data+len is inside the buffer
+			unsigned char *data_last_el = c_data + len - 1;
+			// overflow?
+			if (data_last_el < c_data)
+				return false;
+			if (buf_last_el < data_last_el) {
+				//data starts within buffer but exceeds buffer boundaries
+				return false;
+			}
+			offset = c_data - buffer->data;
 		}
-		offset = c_data-buffer->data;
 	}
 
 
@@ -79,7 +80,6 @@ bool BufferAppend(Buffer* buffer, const void *data, size_t len)
 	unsigned char *tmp = (unsigned char*) realloc(buffer->data, new_len * sizeof(unsigned char));
 	if(tmp == NULL)
 	{
-		//realloc doesn't free buffer->data when it runs out of memory
 		return false;
 	}
 	buffer->data = tmp;
