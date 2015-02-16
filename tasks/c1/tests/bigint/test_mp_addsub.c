@@ -246,3 +246,241 @@ void TestMpSubSimple(void)
                0xDEADC0DE, 0xDEAFBEEF, 0xCAFEBABE,
                0xFEEDBACC, 0xF00BAAAA, 0x12345678);
 }
+
+//----------------------------------------------------------------------
+void TestMpAddVarLen(void)
+{
+  // Addition with two different length arrays
+  // (the shorter array is assumed to be zero extended)
+
+  // a = 2^32 + (2^32 - 1)
+  static const mp_word_t A[2] = {
+    MP_WORD_C(0xFFFFFFFF),
+    MP_WORD_C(0x00000001)
+  };
+
+  // b = 2^31
+  static const mp_word_t B[1] = {
+    MP_WORD_C(0x80000000)
+  };
+
+  // Add A and B
+  mp_word_t z0[2];
+  memset(z0, 0xA5, sizeof(z0));
+  CU_ASSERT_FALSE(MpAdd(z0, A, 2, B, 1));   // Add without carry
+  CU_ASSERT(z0[0] == MP_WORD_C(0x7FFFFFFF));
+  CU_ASSERT(z0[1] == MP_WORD_C(0x00000002));
+
+  // Add B and A
+  mp_word_t z1[2];
+  memset(z1, 0xA5, sizeof(z1));
+  CU_ASSERT_FALSE(MpAdd(z1, B, 1, A, 2));   // Add without carry
+  CU_ASSERT(z1[0] == MP_WORD_C(0x7FFFFFFF));
+  CU_ASSERT(z1[1] == MP_WORD_C(0x00000002));
+}
+
+//----------------------------------------------------------------------
+void TestMpSubVarLen(void)
+{
+  // Subtraction with two different length arrays
+  // (the shorter array is assumed to be zero extended)
+
+  // a = 2^32 + (2^32 - 1)
+  static const mp_word_t A[2] = {
+    MP_WORD_C(0xFFFFFFFF),
+    MP_WORD_C(0x00000001)
+  };
+
+  // b = 2^31
+  static const mp_word_t B[1] = {
+    MP_WORD_C(0x80000000)
+  };
+
+  // Add A and B
+  mp_word_t z0[2];
+  memset(z0, 0x5A, sizeof(z0));
+  CU_ASSERT_FALSE(MpSub(z0, A, 2, B, 1));   // Subtract (no borrow expected)
+  CU_ASSERT(z0[0] == MP_WORD_C(0x7FFFFFFF));
+  CU_ASSERT(z0[1] == MP_WORD_C(0x00000001));
+
+  // Add B and A
+  mp_word_t z1[2];
+  memset(z1, 0x5A, sizeof(z1));
+  CU_ASSERT_TRUE(MpSub(z1, B, 1, A, 2));   // Subtract (borrow expected)
+  CU_ASSERT(z1[0] == MP_WORD_C(0x80000001));
+  CU_ASSERT(z1[1] == MP_WORD_C(0xFFFFFFFE));
+}
+
+//----------------------------------------------------------------------
+void TestMpAddNull(void)
+{
+  // Addition with a zero operand
+
+  // a = 0xDEADC0DE12345678
+  static const mp_word_t A[2] = {
+    MP_WORD_C(0x12345678),
+    MP_WORD_C(0xDEADC0DE)
+  };
+
+  // Add A + 0 (zero expressed as NULL array of length zero)
+  mp_word_t z0[2];
+  memset(z0, 0xAA, sizeof(z0));
+  CU_ASSERT_FALSE(MpAdd(z0, A, 2, NULL, 0)); // Add (no carry expected)
+  CU_ASSERT(z0[0] == MP_WORD_C(0x12345678));
+  CU_ASSERT(z0[1] == MP_WORD_C(0xDEADC0DE));
+
+  // Add 0 + A (zero expressed as NULL array of length zero)
+  mp_word_t z1[2];
+  memset(z1, 0xAA, sizeof(z1));
+  CU_ASSERT_FALSE(MpAdd(z1, NULL, 0, A, 2)); // Add (no carry expected)
+  CU_ASSERT(z1[0] == MP_WORD_C(0x12345678));
+  CU_ASSERT(z1[1] == MP_WORD_C(0xDEADC0DE));
+}
+
+//----------------------------------------------------------------------
+void TestMpSubNull(void)
+{
+  // Subtraction with a zero operand
+
+  // a = 0xDEADC0DE12345678
+  static const mp_word_t A[2] = {
+    MP_WORD_C(0x12345678),
+    MP_WORD_C(0xDEADC0DE)
+  };
+
+  // Subtract A - 0 (zero expressed as NULL array of length zero)
+  mp_word_t z0[2];
+  memset(z0, 0xCA, sizeof(z0));
+  CU_ASSERT_FALSE(MpSub(z0, A, 2, NULL, 0)); // Subtract (no borrow expected)
+  CU_ASSERT(z0[0] == MP_WORD_C(0x12345678));
+  CU_ASSERT(z0[1] == MP_WORD_C(0xDEADC0DE));
+
+  // Subtract 0 - A (zero expressed as NULL array of length zero)
+  mp_word_t z1[2];
+  memset(z1, 0xFE, sizeof(z1));
+  CU_ASSERT_TRUE(MpSub(z1, NULL, 0, A, 2)); // Subtract (borrow expected)
+  CU_ASSERT(z1[0] == MP_WORD_C(0xEDCBA988));
+  CU_ASSERT(z1[1] == MP_WORD_C(0x21523F21));
+}
+
+//----------------------------------------------------------------------
+void TestMpAddBadDest(void)
+{
+  // Addition with bad destination operand (should behave as no-operation)
+
+  // a = 2^32 + (2^32 - 1)
+  static const mp_word_t A[2] = {
+    MP_WORD_C(0xFFFFFFFF),
+    MP_WORD_C(0x00000001)
+  };
+
+  // b = 2^31
+  static const mp_word_t B[1] = {
+    MP_WORD_C(0x80000000)
+  };
+
+  CU_ASSERT_FALSE(MpAdd(NULL, A, 2, B, 1));
+}
+
+//----------------------------------------------------------------------.
+void TestMpSubBadDest(void)
+{
+  // Subtraction with bad destination operand (should behave as no-operation)
+
+  // a = 2^32 + (2^32 - 1)
+  static const mp_word_t A[2] = {
+    MP_WORD_C(0xFFFFFFFF),
+    MP_WORD_C(0x00000001)
+  };
+
+  // b = 2^31
+  static const mp_word_t B[1] = {
+    MP_WORD_C(0x80000000)
+  };
+
+  CU_ASSERT_FALSE(MpSub(NULL, A, 2, B, 1));
+}
+
+//----------------------------------------------------------------------
+void TestMpAddBadSource(void)
+{
+  // Addition with bad source and/or destination operands.
+  // (This testcase must complete without SEGFAULTs or aborts)
+
+  // a = 0xDEADC0DE12345678
+  static const mp_word_t A[2] = {
+    MP_WORD_C(0x12345678),
+    MP_WORD_C(0xDEADC0DE)
+  };
+
+
+  // Test with bad destination operand (should behave as no-op)
+  CU_ASSERT_FALSE(MpAdd(NULL, A, 2, NULL, 3));
+  CU_ASSERT_FALSE(MpAdd(NULL, NULL, 3, A, 2));
+  CU_ASSERT_FALSE(MpAdd(NULL, NULL, 2, NULL, 3));
+
+  // Test with valid destination operand
+  //
+  // The API specification does not specify explicitly rule out implementations,
+  // which treat NULL arrays of non-zero length as zero values.
+  //
+  // We expect one of the following two behaviors here:
+  //
+  //  1. Treat a NULL array of non-zero length as invalid argument. In this
+  //     case MpAdd should behave as no-op. For this variant, the returned carry
+  //     value should always be false.
+  //
+  // -OR-
+  //
+  //  2. Treat a NULL array of non-zero length as zero value. In this case
+  //     MpAdd should behave as normal addition with zero. For this variant,
+  //     the returned carry value will always be false.
+  //
+  mp_word_t z0[3];
+
+  CU_ASSERT_FALSE(MpAdd(z0, A, 2, NULL, 3));
+  CU_ASSERT_FALSE(MpAdd(z0, NULL, 3, A, 2));
+  CU_ASSERT_FALSE(MpAdd(z0, NULL, 2, NULL, 3));
+}
+
+//----------------------------------------------------------------------
+void TestMpSubBadSource(void)
+{
+  // Subtraction with bad source and/or destination operands.
+  // (This testcase must complete without SEGFAULTs or aborts)
+
+  // a = 0xDEADC0DE12345678
+  static const mp_word_t A[2] = {
+    MP_WORD_C(0x12345678),
+    MP_WORD_C(0xDEADC0DE)
+  };
+
+  // Test with bad destination operand (should behave as no-op)
+  CU_ASSERT_FALSE(MpSub(NULL, A, 2, NULL, 3));
+  MpSub(NULL, NULL, 3, A, 2); // Borrow depends on implementation
+  CU_ASSERT_FALSE(MpSub(NULL, NULL, 2, NULL, 3));
+
+  // Test with valid destination operand
+  //
+  // The API specification does not specify explicitly rule out implementations,
+  // which treat NULL arrays of non-zero length as zero values.
+  //
+  // We expect one of the following two behaviors here:
+  //
+  //  1. Treat a NULL array of non-zero length as invalid argument. In this
+  //     case MpSub should behave as no-op. For this variant, the returned borrow
+  //     value should always be false.
+  //
+  // -OR-
+  //
+  //  2. Treat a NULL array of non-zero length as zero value. In this case
+  //     MpSub should behave as normal addition with zero. For this variant, the
+  //     returned borrow value will be false if the second operand is zero (x - 0).
+  //
+  mp_word_t z0[3];
+
+  CU_ASSERT_FALSE(MpSub(z0, A, 2, NULL, 3));
+  MpSub(z0, NULL, 3, A, 2); // Borrow depends on implementation
+  CU_ASSERT_FALSE(MpSub(z0, NULL, 2, NULL, 3));
+}
+

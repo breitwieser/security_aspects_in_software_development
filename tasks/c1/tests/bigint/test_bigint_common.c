@@ -5,6 +5,7 @@
 /// The helper functions in this file are used to initialize
 /// big integers for the remaining tests.
 #include "tests.h"
+#include "tinybn_imp.h"
 
 //----------------------------------------------------------------------
 BigInteger* TestHelperBigIntInit(size_t len, const mp_word_t *init_values)
@@ -19,4 +20,14 @@ BigInteger* TestHelperBigIntInit(size_t len, const mp_word_t *init_values)
   }
 
   return bn;
+}
+
+//----------------------------------------------------------------------
+void assertMagnitude(const BigInteger *b1, const mp_word_t *words, size_t len) {
+	CU_ASSERT_EQUAL(b1->wordcount, len);
+	if(b1->wordcount != len)
+		return;
+	for (size_t i = 0; i < b1->wordcount; i++)
+	    CU_ASSERT_EQUAL(b1->words[i], words[i]);
+
 }

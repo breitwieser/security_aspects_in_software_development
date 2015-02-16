@@ -44,5 +44,11 @@ int main(void)
   ///  HINT: Declare a "name" variable as suitable fixed-size character
   ///  arrray and use klee_make_symbolic to mark it as symbolic value.
   ///  Then call HelloWorld with your symbolic variable as argument.
+#define L 100
+  char name[L] = "SASE";
+  klee_make_symbolic(name, sizeof(name), "name");
+  klee_assume(name[L-1] == '\0');
+  HelloWorld(name);
+
   return 0;
 }

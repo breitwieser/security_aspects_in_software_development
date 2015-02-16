@@ -14,6 +14,14 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     .pTests = (CU_TestInfo[]) {
       { "add.simple", TestMpAddSimple },
       { "sub.simple", TestMpSubSimple },
+      { "add.varlen", TestMpAddVarLen },
+      { "sub.varlen", TestMpSubVarLen },
+      { "add.null",   TestMpAddNull },
+      { "sub.null",   TestMpSubNull },
+      { "add.bad.dest", TestMpAddBadDest },
+      { "sub.bad.dest", TestMpSubBadDest },
+      { "add.bad.source", TestMpAddBadSource },
+      { "sub.bad.dest", TestMpSubBadSource },
       CU_TEST_INFO_NULL,
     }
   },
@@ -25,6 +33,11 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     .pCleanupFunc = &TestSuiteCleanup,
     .pTests = (CU_TestInfo[]) {
       { "mul.simple", TestMpMulSimple },
+      { "mul.varlen", TestMpMulVarLen },
+      { "mul.null",   TestMpMulNull },
+      { "mul.large",  TestMpMulLarge },
+      { "mul.bad.dest", TestMpMulBadDest },
+      { "mul.bad.source", TestMpMulBadSource },
       CU_TEST_INFO_NULL,
     }
   },
@@ -36,6 +49,8 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     .pCleanupFunc = &TestSuiteCleanup,
     .pTests = (CU_TestInfo[]) {
       { "cmp.simple", TestMpCompareSimple },
+      { "cmp.zero",   TestMpCompareZero },
+      { "cmp.task3",   TestMpCompareTask3 },
       CU_TEST_INFO_NULL,
     }
   },
@@ -50,6 +65,7 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
       { "alloc.nomem",  TestBigIntAllocNoMem  },
       { "init.simple",  TestBigIntInitSimple },
       { "free.null",    TestBigIntFreeNull },
+      { "alloc.task3",    TestBigIntAllocTask3 },
       CU_TEST_INFO_NULL,
     }
   },
@@ -71,6 +87,7 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
       { "save.null", TestBigIntSaveNull },
       { "get.null", TestBigIntGetNull },
       { "set.null", TestBigIntSetNull },
+      { "io.task3", TestBigIntIOTask3 },
       CU_TEST_INFO_NULL,
     }
   },
@@ -85,6 +102,50 @@ CU_SuiteInfo UNIT_TEST_SUITES[] = {
     .pTests = BIGINT_INTERNAL_TESTS,
   },
 
+  // Unit tests for basic big-integer functionality
+  {
+    .pName        = "bigint/compare",
+    .pInitFunc    = &TestSuiteInit,
+    .pCleanupFunc = &TestSuiteCleanup,
+    .pTests = (CU_TestInfo[]) {
+     { "test.sign", TestBigIntSgn },
+     { "compare.simple", TestBigIntCompareSimple },
+     CU_TEST_INFO_NULL,
+    }
+  },
+
+  {
+    .pName        = "bigint/misc",
+    .pInitFunc    = &TestSuiteInit,
+    .pCleanupFunc = &TestSuiteCleanup,
+    .pTests = (CU_TestInfo[]) {
+      { "misc.copy", TestBigIntCopy },
+      { "misc.neg", TestBigIntNeg },
+      { "misc.abs", TestBigIntAbs },
+      CU_TEST_INFO_NULL,
+     }
+   },
+
+   {
+     .pName        = "bigint/addsub",
+     .pInitFunc    = &TestSuiteInit,
+     .pCleanupFunc = &TestSuiteCleanup,
+     .pTests = (CU_TestInfo[]) {
+       { "addsub.add", TestBigIntAdd },
+       { "addsub.sub", TestBigIntSub },
+       CU_TEST_INFO_NULL,
+      }
+    },
+
+    {
+      .pName        = "bigint/mult",
+      .pInitFunc    = &TestSuiteInit,
+      .pCleanupFunc = &TestSuiteCleanup,
+      .pTests = (CU_TestInfo[]) {
+        { "mult.mult", TestBigIntMult },
+        CU_TEST_INFO_NULL,
+       }
+     },
   // End of test suites
   CU_SUITE_INFO_NULL
 };

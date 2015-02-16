@@ -16,9 +16,17 @@ bool BigIntCopy(BigInteger *z, const BigInteger *a)
 
   /// \todo Copy the value and sign of big-integer a to
   ///  big-integer z. (Note that a and z may refer to the same object).
+  if(z == a)
+      return true;
+  if(a->words == NULL)
+    return false;
+  z->sign = a->sign;
 
-  return false; // Not yet implemented
-}
+  if(!_BigIntResize(z, a->wordcount))
+      return false;
+  memcpy(z->words, a->words, a->wordcount*sizeof(mp_word_t));
+  return true;
+ }
 
 //----------------------------------------------------------------------
 bool BigIntNeg(BigInteger *z, const BigInteger *a)
@@ -26,8 +34,15 @@ bool BigIntNeg(BigInteger *z, const BigInteger *a)
   /// \todo Copy the value of big-integer \c a to big-integer \c z. Set
   /// the sign of \c z to the opposite of the sign of \c a.
   /// (Note that a and z may refer to the same object).
-
-  return false; // Not yet implemented
+  if(BigIntCopy(z,a))
+  {
+    if(a->sign == zero)
+      z->sign = zero;
+    else
+      z->sign = -a->sign;
+    return true;
+  }
+  return false;
 }
 
 
