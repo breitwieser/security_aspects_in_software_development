@@ -26,14 +26,17 @@ public enum IntendedUsage {
     @Override
     public boolean isAllowedBy(BasicConstraints basic, KeyUsage usage) {
       // TODO: Check that the basic constraints indicate a CA certificate,
-      // with a path length constraint larger than zero. Additionally
+      // with a path length constraint larger OR EQUAL to zero. Additionally
       // check that the key usage extension allows use of the public key
       // for
       // verifying signatures on oter certificates.
-
-      // ---BEGIN STUDENT CODE---
-      throw new UnsupportedOperationException("Please implement this operation.");
-      // ---END STUDENT CODE---
+      if(basic == null || usage == null)
+    	  return false;
+      if(!basic.ca())
+    	  return false;
+      if(basic.getPathLenConstraint() < 0)
+    	  return false;
+      return usage.isSet(KeyUsage.keyCertSign);
     }
   },
 
@@ -46,9 +49,10 @@ public enum IntendedUsage {
     public boolean isAllowedBy(BasicConstraints basic, KeyUsage usage) {
       // TODO: Check that the public key in the certificate can be used
       // for verifying digital signatures.
-      // ---BEGIN STUDENT CODE---
-      throw new UnsupportedOperationException("Please implement this operation.");
-      // ---END STUDENT CODE---
+    	
+	  if(basic == null || usage == null)
+		  return false;
+      return usage.isSet(KeyUsage.digitalSignature);
     }
   },
 
@@ -60,9 +64,9 @@ public enum IntendedUsage {
     public boolean isAllowedBy(BasicConstraints basic, KeyUsage usage) {
       // TODO: Check that the public key in the certificate can be
       // used to transport symmetric session keys. (key encipherment)
-      // ---BEGIN STUDENT CODE---
-      throw new UnsupportedOperationException("Please implement this operation.");
-      // ---END STUDENT CODE---
+      if(basic == null || usage == null)
+      	  return false;
+      return usage.isSet(KeyUsage.keyEncipherment);
     }
   };
 

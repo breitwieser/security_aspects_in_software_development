@@ -1,5 +1,7 @@
 package at.iaik.teaching.sase.ku2013.protocolAnalysis;
 
+import java.nio.charset.Charset;
+
 /**
  * Plain channel implementation without any response or request modifications.
  * 
@@ -12,6 +14,9 @@ package at.iaik.teaching.sase.ku2013.protocolAnalysis;
  * man-in-the-middle.
  */
 public final class PlainChannel implements CommunicationChannel {
+  
+  private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
+	
   @Override
   public byte[] transmit(ResourceCheckServer server, byte[] request)
       throws ResourceCheckException {
@@ -27,8 +32,18 @@ public final class PlainChannel implements CommunicationChannel {
     // TODO: Begin your attack here.
 
     // ---BEGIN STUDENT CODE---
+    
+    //No mechanism to protect integrity
+    
     String resp = new String(response);
     System.out.println("response:\n\t" + resp);
+    if(resp.replaceAll("\\s+","").contains("status=0"))
+    {
+    	resp = resp.split("\n")[0];
+	    resp += "\n\tstatus=1";
+	    System.out.println("RESPONSE CHANGED TO:\n\t"+resp);
+	    response = resp.getBytes(CHARSET_UTF8);
+    }
     // ---END STUDENT CODE---
 
     // And return the response
