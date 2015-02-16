@@ -105,6 +105,9 @@ int TestExecSimple(const char *name, size_t max_stack,
   CU_ASSERT_PTR_NOT_NULL_FATAL(vm);
   CU_ASSERT_TRUE_FATAL(VmLoadByteCode(vm, bytecode));
 
+  // Discard the input buffer
+  BufferFree(bytecode);
+
   // Main execute loop
   int ret;
   do {

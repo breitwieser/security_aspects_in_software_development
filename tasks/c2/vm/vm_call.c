@@ -139,7 +139,21 @@ int VmBcJmp(VmContext *vm, uint32_t pc, uint32_t imm)
   // the int16_t cast to do the sign extension for us.
   int32_t offset = (int16_t) imm;
 
+//  printf("jmp offset: %d\n", offset);
   /// \todo Check that the jump does not overflow the program counter.
+  if(UINT32_MAX - 1 < pc){
+	  VmLogError(vm, "bc: jmp: programm counter overflow detected.");
+	return -1;
+  }
+  if(offset>0 && UINT32_MAX - 1 - pc < ((uint16_t) offset))
+  {
+	  VmLogError(vm, "bc: jmp: programm counter overflow detected.");
+	  return -1;
+  }else if(offset<0 && ((uint16_t) (offset*(-1)) > pc + 1))
+  {
+	  VmLogError(vm, "bc: jmp: programm counter underflow detected.");
+	  return -1;
+  }
 
   // Adjust the target PC
   vm->pc = pc + 1 + offset;

@@ -21,6 +21,10 @@ void TestTokenBadGettersNull(void);
 void TestTokenBadDeleteNull(void);
 void TestTokenOutOfMemory(void);
 
+
+// Unit tests for memview handling (defined in memview.c)
+void TestMemViewCreateSimple(void);
+
 // Unit tests for buffer handling (defined in buffer.c)
 void TestBufferCreateSimple(void);
 void TestBufferClearZero(void);
@@ -35,6 +39,7 @@ void TestBufferBadGettersNull(void);
 void TestBufferBadAppendNull(void);
 void TestBufferBadAppendOverflow(void);
 void TestBufferBadOutOfMemorySingle(void);
+void TestBufferRemaining(void);
 
 // Unit tests for the lexical analyser (defined in lexer.c)
 void TestLexerCreateStrSimple(void);
@@ -69,6 +74,11 @@ void TestLexerBadOutOfMemoryDeleteCb(void);
 void TestAsmCreateSimple(void);
 void TestAsmDeleteNull(void);
 void TestAsmParseSimple(void);
+void TestAsmParseSyntax(void);
+void TestAsmParseSyntaxSwap(void);
 void TestAsmBadOutOfMemoryCreate(void);
 
+// Unit tests for the complete assembler (defined in build.c)
+void TestAsmBuildHello(void);
+void TestAsmBuildArc4(void);
 #endif // ASSEMBLER_TESTS_H

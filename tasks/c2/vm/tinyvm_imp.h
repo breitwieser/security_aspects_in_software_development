@@ -131,6 +131,14 @@ struct VmContext
   ///
   /// \li Fields to hold your virtual stack pointer, virtual program
   ///     counter, ...
+
+  uint32_t *stack;
+  size_t stack_size;
+  size_t max_stack;
+
+  VmObject **objs;
+  size_t objs_size;
+
 };
 
 //----------------------------------------------------------------------
@@ -146,6 +154,9 @@ struct VmObject
   VmQualifiers qualifiers;
 
   /// \todo Add the fields specific to your implementation here.
+
+  Buffer* buffer;
+  bool big_endian;
 };
 
 /// \todo Add your own helper functions, data structures, constants, ...

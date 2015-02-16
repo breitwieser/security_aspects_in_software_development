@@ -361,3 +361,26 @@ void TestBufferBadOutOfMemorySingle(void)
   // Cleanup
   AsmBufferClear(&buffer);
 }
+
+
+//----------------------------------------------------------------------
+void TestBufferRemaining(void)
+{
+	CU_ASSERT_FALSE(BufferAppend(NULL, NULL, 5));
+
+	//Test Buffer append; data is subslice of Buffer and out of bounds
+	Buffer *b = BufferCreate();
+	const unsigned char data[5] = "HELLO";
+	CU_ASSERT_TRUE(BufferAppend(b, data, 5));
+	CU_ASSERT_EQUAL(BufferGetLength(b), 5);
+	//append subslice; slice exceeds buffer bounds
+	unsigned char *buffer_data = BufferGetBytes(b, 0, 5);
+	CU_ASSERT_FALSE(BufferAppend(b, buffer_data+3, 3));
+
+	//append subslice; slice within buffer bounds
+	CU_ASSERT_TRUE(BufferAppend(b, buffer_data+4, 1));
+	CU_ASSERT_EQUAL(BufferGetLength(b), 6);
+	CU_ASSERT_EQUAL(0, memcmp(BufferGetBytes(b, 0, 6), "HELLOO", 6));
+
+	BufferFree(b);
+}

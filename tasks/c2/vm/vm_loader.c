@@ -3,6 +3,7 @@
 /// \brief Bytecode image loader.
 ///
 #include "tinyvm_imp.h"
+#include "util/memview.h"
 
 //----------------------------------------------------------------------
 /// \brief Loads a file into a byte buffer.
@@ -131,5 +132,112 @@ bool VmLoadByteCode(VmContext *vm, Buffer *source)
   /// setup the stack frame for the "main" function of the loaded program.
   /// (The handle of object containing the function is stored in the
   ///  "entry" field of the bytecode header; cf. \c bytecodes.h)
-  return false;
+  ///
+  unsigned char* test = BufferGetBytes(source, 0, 1);
+  if(test == NULL)
+    return false;
+  MemView memview;
+  if(!MemInit(&memview, test[0] == 't' ? MEM_VIEW_BIGENDIAN : MEM_VIEW_NORMAL, source, 0, BufferGetLength(source)))
+  {
+    printf("\nMemInit failed\n");
+    return false;
+  }
+  uint32_t start_tag;      // Magic start tag bytes (VM_TAG_UNIT)
+  if(!MemGetWord(&start_tag, &memview, 0))
+  {
+      printf("MemGetWord failed\n");
+      return false;
+  }
+  if(start_tag != VM_TAG_UNIT)
+  {
+      // error
+      printf("wrong tag\n");
+      return false;
+  }
+
+  uint16_t vm_major;       // Major VM version (VM_VERSION_MAJOR)
+  if(!MemGetHalf(&vm_major, &memview, 4))
+  {
+      printf("MemGetHalf failed\n");
+      return false;
+  }
+  uint16_t vm_minor;       // Minor VM version (VM_VERSION_MINOR)
+  if(!MemGetHalf(&vm_minor, &memview, 6))
+  {
+      printf("MemGetHalf2 failed\n");
+      return false;
+  }
+  uint32_t vm_entry;       // Handle of the entry-point function
+  if(!MemGetWord(&vm_entry, &memview, 8))
+  {
+      printf("MemGetWord failed\n");
+      return false;
+  }
+
+  ///   VmBinObject[] objects;   // Objects defined in this unit
+  int offset = 12;
+  while(true)
+  {
+    uint32_t obj_tag;        // Magic object tag bytes (VM_TAG_OBJECT)
+    if(!MemGetWord(&obj_tag, &memview, offset))
+    {
+        printf("MemGetWord2 failed\n");
+        return false;
+    }
+    if(obj_tag == VM_TAG_END) // Magic end tag bytes (VM_TAG_END)
+    {
+      break;
+    }
+    if(obj_tag == VM_TAG_OBJECT)
+    {
+        uint32_t qualifiers;     // Qualifiers of this object (VmQualifiers)
+        if(!MemGetWord(&qualifiers, &memview, offset+4))
+        {
+            printf("MemGetWorda2 failed\n");
+            return false;
+        }
+        uint32_t handle;         // Handle of this object
+        if(!MemGetWord(&handle, &memview, offset+8))
+        {
+            printf("MemGetWordb2 failed\n");
+            return false;
+        }
+        uint32_t length;         // Length of the object content
+        if(!MemGetWord(&length, &memview, offset+12))
+        {
+            printf("MemGetWordc2 failed\n");
+            return false;
+        }
+
+        unsigned char* data = MemGetBytes(&memview, offset+16, length); // Payload data of the object
+        if(data == NULL)
+          return false;
+        if(!VmCreateObject(vm, handle, qualifiers, data, length))
+        {
+            printf("VmCreateObject failed\n");
+            return false;
+        }
+        VmObject* obj = VmGetObject(vm, handle);
+        if(obj == NULL)
+        {
+            printf("VmGetObject failed\n");
+            return false;
+        }
+        // set endianess, so we can access it in VmAccessObject
+        obj->big_endian = MemIsBigEndian(&memview);
+        printf("Got handle: %x\n", handle);
+        offset += 16 + length;
+    }
+    else
+    {
+        printf("don't know tag %x\n", obj_tag);
+        return false;
+    }
+  }
+  if(!VmSetupCall(vm, vm_entry)) // setup stack for main function
+  {
+    printf("VmSetupCall failed\n");
+    return false;
+  }
+  return true;
 }

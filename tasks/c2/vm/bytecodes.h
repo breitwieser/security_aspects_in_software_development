@@ -1175,4 +1175,37 @@ typedef enum VmQualifiers {
 
 /// @}
 
+//----------------------------------------------------------------------
+/// \name Optional extensions
+///
+/// @{
+///
+
+/// \brief Lowest object handle, which may be allocated by the \c VMC(VM_ALLOC)
+///   function.
+#define VM_DYNAMIC_HANDLE_FIRST 0x40000000U
+
+/// \brief Highest object handle, which may be allocated by the \c VMC(VM_ALLOC)
+///   function.
+#define VM_DYNAMIC_HANDLE_LAST  0x40FFFFFFU
+
+/// \brief (Permanently) allocates a new virtual machine object. \c VMC(VM_ALLOC)
+///
+/// \par Bytecode
+///  \verbatim | 0x60 | 0x04 | \endverbatim
+///
+/// \par Stack
+///   \f$ \ldots, size \rightarrow \ldots, handle \f$
+///
+/// The \c VMC_ALLOC virtual machine call permanently allocates a new data object of the
+/// given size (in bytes) and pushes the handle of the new object to the virtual machine stack.
+/// The handle returned by this opcode will be in range \ref VM_DYNAMIC_HANDLE_FIRST to
+/// \ref VM_DYNAMIC_HANDLE_LAST.
+///
+/// Note that there is currently no way to deallocate the object. (It will remain visible
+/// until the virtual machine is terminated).
+#define VMC_ALLOC   VMC_CODE(0, 4)
+
+/// @}
+
 #endif // TINYVM_BYTECODE_H

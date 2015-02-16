@@ -21,4 +21,12 @@ void TestVmExecHelloLittleEndian(void);
 void TestVmExecRot13BigEndian(void);
 void TestVmExecRot13LittleEndian(void);
 
+void TestVmExecUdivBy0LittleEndian(void);
+void TestVmExecSdivBy0LittleEndian(void);
+void TestVmExecSdivOverflowLittleEndian(void);
+void TestVmExecMJmpLittleEndian(void);
+void TestVmExecAProtLittleEndian(void);
+void TestVmExecW2ROVarLittleEndian(void);
+
+
 #endif // VM_TESTS_H

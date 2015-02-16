@@ -1,0 +1,22 @@
+//
+// SDIV by Zero Test
+//
+// Tests if this program fails gracefully
+//
+
+//
+// Main program
+//
+.function main()
+  IMM(-10)
+  IMM(0)
+  SDIV
+
+  // Exit the program (this VM call will not return)
+  VMC(VM_EXIT)
+
+  // This code should never be reached (VM_EXIT should not return)
+  IMM(0)
+  VMC(VM_ASSERT)
+  RET
+.end

@@ -91,6 +91,9 @@ AsmLexer* AsmLexerCreate(AsmLexerReadCallback read_cb,
   lexer->appData = app_data;
   lexer->lookahead = ASM_LEXER_EOF;
 
+  lexer->line = 1;
+  lexer->column = 0;
+
   /// \todo Initialize your lexer state
   return lexer;
 }
@@ -246,6 +249,328 @@ static inline int AsmLexerSkipLineComment(AsmLexer *lexer)
 }
 
 
+int isInteger(int c)
+{
+  return (c >= '0' && c <= '9') || c == '-';
+}
+
+int isDigit(int c)
+{
+  return (c >= '0' && c <= '9');
+}
+
+int isHex(int c)
+{
+  return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') ||(c >= '0' && c <= '9');
+}
+
+int isOct(int c)
+{
+  return (c >= '0' && c <= '7');
+}
+
+bool isLetter(int c)
+{
+  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+bool isLetterUnderscore(int c)
+{
+  return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+}
+
+bool isSpecial(int c)
+{
+  return (c == '[') || (c == ']') || (c == '(') || (c == ')') || (c == ',');
+}
+
+bool isEOF(int c)
+{
+  return c == ASM_LEXER_EOF;
+}
+
+int upper(int c)
+{
+  if(c >= 'a' && c <= 'f')
+     return ('A' + c - 'a');
+  if(c == 'X')
+    return 'x';
+  return c;
+}
+
+/// Tokens to be recognized:
+/// * Identifiers and keywords starting with a letter or underscore
+///   (A-Z,a-z,_) followed by zero or more letters, digits or underscores.
+///
+///   Use the AsmKeywordLookup function to distinguish between identifier and
+///   normal keywords.
+///
+///   For keywords, the lookup function will return an AsmKeywordInfo object
+///   with the correct token code for the keyowrd, for identifiers the lookup
+///   function will return NULL. (The token code for identifiers is ASM_TOKEN_IDENTIFIER)
+int AsmScanIdentifier(int first, AsmToken **ptoken, AsmLexer *lexer)
+{
+  int c = first;
+  AsmBuffer* buffer = (AsmBuffer*)malloc(sizeof(AsmBuffer));
+  AsmBufferInit(buffer, false);
+
+  do
+  {
+    AsmBufferAppendByte(buffer, c);
+    c = AsmLexerNextChar(lexer, false);
+    if(c == ASM_LEXER_ERROR)
+    {
+        AsmBufferClear(buffer);
+        free(buffer);
+        buffer = NULL;
+        return ASM_LEXER_ERROR;
+    }
+  } while(isLetterUnderscore(c) || isDigit(c));
+
+  const AsmKeywordInfo* info = AsmKeywordLookup(AsmBufferBytes(buffer), AsmBufferLength(buffer));
+  int type = ASM_TOKEN_IDENTIFIER;
+  if(info != NULL) // keyword
+    type = info->tokenType;
+  AsmToken* tok = AsmTokenNew(type, lexer->line, lexer->column, AsmBufferBytes(buffer), AsmBufferLength(buffer));
+  AsmBufferClear(buffer);
+  free(buffer);
+  buffer = NULL;
+  if(tok == NULL)
+    return ASM_LEXER_ERROR;
+  *ptoken = tok;
+  lexer->lookahead = c;
+  return ASM_LEXER_SUCCESS;
+}
+
+///
+/// * Local variable names starting with an "@" followed by one or more
+///   letters, digits or underscores.
+///
+///   The name following an "@" is not scanned for keywords. (for example,
+///   '@data' would be a valid local name)
+///
+///   The token code for local names is ASM_TOKEN_LOCAL_NAME
+int AsmScanLocalVariable(AsmToken **ptoken, AsmLexer *lexer)
+{
+  int c = '@';
+  AsmBuffer* buffer = (AsmBuffer*)malloc(sizeof(AsmBuffer));
+  AsmBufferInit(buffer, false);
+  do
+  {
+      AsmBufferAppendByte(buffer, c);
+    c = AsmLexerNextChar(lexer, false);
+    if(c == ASM_LEXER_ERROR)
+    {
+        AsmBufferClear(buffer);
+        free(buffer);
+        buffer = NULL;
+        return ASM_LEXER_ERROR;
+    }
+  } while(isLetterUnderscore(c) || isDigit(c));
+
+  AsmToken* tok = AsmTokenNew(ASM_TOKEN_LOCAL_NAME, lexer->line, lexer->column, AsmBufferBytes(buffer), AsmBufferLength(buffer));
+  AsmBufferClear(buffer);
+  free(buffer);
+  buffer = NULL;
+  if(tok == NULL)
+    return ASM_LEXER_ERROR;
+  *ptoken = tok;
+  lexer->lookahead = c;
+  return ASM_LEXER_SUCCESS;
+}
+
+///
+/// * Special keywords starting with a "." followed by a non-empty sequence
+///   of letters.
+///
+///   You can use the AsmKeywordLookup function to find the token code
+///   for special keywords (don't forget to pass the leading '.'). For valid
+///   special keywords the lookup function will return an AsmKewordInfo structure
+///   for invalid keywords NULL is returned.
+int AsmScanKeyword(AsmToken **ptoken, AsmLexer *lexer)
+{
+  int c = '.';
+  AsmBuffer* buffer = (AsmBuffer*)malloc(sizeof(AsmBuffer));
+  AsmBufferInit(buffer, false);
+  do
+  {
+    AsmBufferAppendByte(buffer, c);
+    c = AsmLexerNextChar(lexer, false);
+    if(c == ASM_LEXER_ERROR)
+    {
+        AsmBufferClear(buffer);
+        free(buffer);
+        buffer = NULL;
+        return ASM_LEXER_ERROR;
+    }
+  } while(isLetter(c));
+
+  const AsmKeywordInfo* info = AsmKeywordLookup(AsmBufferBytes(buffer), AsmBufferLength(buffer));
+  if(info == NULL) // invalid keyword
+  {
+      AsmBufferClear(buffer);
+      free(buffer);
+      buffer = NULL;
+      return ASM_LEXER_ERROR;
+  }
+  AsmToken* tok = AsmTokenNew(info->tokenType, lexer->line, lexer->column, AsmBufferBytes(buffer), AsmBufferLength(buffer));
+  AsmBufferClear(buffer);
+  free(buffer);
+  buffer = NULL;
+  if(tok == NULL)
+    return ASM_LEXER_ERROR;
+  *ptoken = tok;
+  lexer->lookahead = c;
+  return ASM_LEXER_SUCCESS;
+}
+
+///
+/// * Decimal, hexadecimal and octal integers (token code: ASM_TOKEN_INT)
+///   Any integer may start with a leading '-' sign.
+///
+///   + Decimal integers consist of a leading non-zero decimal digit (1-9) followed
+///     by an optional sequence of arbitrary decimal digits (0-9).
+///
+///   + Hexadecimal integers start with a leading "0x" or "0X" prefix followed
+///     by a non-empty sequence of hexadecimal digits (0-9, A-F, a-f)
+///
+///   + Octal digits start with a leading zero (0) followed by an optional sequence
+///     of arbitrary octal digits (0-7)
+///
+///   Your scanner should return the parsed integer "string" (including the
+///   leading '-' if any) as token text. (Actual integer parsing of the text
+///   into an int64_t value is handled by the AsmUtilParseInteger and should NOT
+///   be implemented here)
+///
+///   The token code for integers is ASM_TOKEN_INT
+int AsmScanInteger(int first, AsmToken **ptoken, AsmLexer *lexer)
+{
+  int c = first;
+  bool neg = false;
+  AsmBuffer* buffer = (AsmBuffer*)malloc(sizeof(AsmBuffer));
+  AsmBufferInit(buffer, false);
+  if(c == '-') // parse -
+  {
+      neg = true;
+      AsmBufferAppendByte(buffer, c);
+      c = AsmLexerNextChar(lexer, false);
+      if(c == ASM_LEXER_ERROR)
+        {
+            AsmBufferClear(buffer);
+            free(buffer);
+            buffer = NULL;
+            return ASM_LEXER_ERROR;
+        }
+  }
+  if(c == '0') // Hex or Oct
+  {
+      AsmBufferAppendByte(buffer, c);
+      c = AsmLexerNextChar(lexer, false);
+      if(c == ASM_LEXER_ERROR)
+        {
+            AsmBufferClear(buffer);
+            free(buffer);
+            buffer = NULL;
+            return ASM_LEXER_ERROR;
+        }
+      if(c == 'x' || c == 'X') // hex
+      {
+          int hcount = 0;
+          do
+          {
+            AsmBufferAppendByte(buffer, upper(c));
+            hcount++;
+            c = AsmLexerNextChar(lexer, false);
+            if(c == ASM_LEXER_ERROR)
+            {
+                  AsmBufferClear(buffer);
+                  free(buffer);
+                  buffer = NULL;
+                  return ASM_LEXER_ERROR;
+            }
+          } while(isHex(c));
+          if(hcount < 2)
+          {
+              AsmBufferClear(buffer);
+              free(buffer);
+              buffer = NULL;
+              return ASM_LEXER_ERROR;
+          }
+      }
+      else if(isOct(c)) // oct
+      {
+          do
+          {
+            AsmBufferAppendByte(buffer, c);
+            c = AsmLexerNextChar(lexer, false);
+            if(c == ASM_LEXER_ERROR)
+              {
+                  AsmBufferClear(buffer);
+                  free(buffer);
+                  buffer = NULL;
+                  return ASM_LEXER_ERROR;
+              }
+          } while(isOct(c));
+      }
+      // 0 is a valid oct number
+      if(! (isEOF(c) || AsmLexerIsSpace(c) || isSpecial(c))) // error
+      {
+            AsmBufferClear(buffer);
+            free(buffer);
+            buffer = NULL;
+            return ASM_LEXER_ERROR;
+      }
+  }
+  else if (isDigit(c)) // Decimal
+  {
+      do
+      {
+        AsmBufferAppendByte(buffer, c);
+        c = AsmLexerNextChar(lexer, false);
+        if(c == ASM_LEXER_ERROR)
+          {
+              AsmBufferClear(buffer);
+              free(buffer);
+              buffer = NULL;
+              return ASM_LEXER_ERROR;
+          }
+      } while(isDigit(c));
+      if(! (isEOF(c) || AsmLexerIsSpace(c) || isSpecial(c))) // error
+      {
+            AsmBufferClear(buffer);
+            free(buffer);
+            buffer = NULL;
+            return ASM_LEXER_ERROR;
+      }
+  }
+  else if(neg) // minus without number
+  {
+      AsmBufferClear(buffer);
+      free(buffer);
+      buffer = NULL;
+      return ASM_LEXER_ERROR;
+  }
+
+  AsmToken* tok = AsmTokenNew(ASM_TOKEN_INT, lexer->line, lexer->column, AsmBufferBytes(buffer), AsmBufferLength(buffer));
+  AsmBufferClear(buffer);
+  free(buffer);
+  buffer = NULL;
+  if(tok == NULL)
+    return ASM_LEXER_ERROR;
+  *ptoken = tok;
+  lexer->lookahead = c;
+  return ASM_LEXER_SUCCESS;
+}
+
+int AsmScanSingle(int type, const char* name, AsmToken **ptoken, AsmLexer *lexer)
+{
+  AsmToken* tok = AsmTokenNew(type, lexer->line, lexer->column, name, 1);
+  if(tok == NULL)
+    return ASM_LEXER_ERROR;
+  *ptoken = tok;
+  return ASM_LEXER_SUCCESS;
+}
+
 //----------------------------------------------------------------------
 int AsmLexerScan(AsmToken **ptoken, AsmLexer *lexer)
 {
@@ -306,6 +631,11 @@ int AsmLexerScan(AsmToken **ptoken, AsmLexer *lexer)
   ///   For keywords, the lookup function will return an AsmKeywordInfo object
   ///   with the correct token code for the keyowrd, for identifiers the lookup
   ///   function will return NULL. (The token code for identifiers is ASM_TOKEN_IDENTIFIER)
+
+  if(isLetterUnderscore(first))
+  {
+    return AsmScanIdentifier(first, ptoken, lexer);
+  }
   ///
   /// * Local variable names starting with an "@" followed by one or more
   ///   letters, digits or underscores.
@@ -314,6 +644,11 @@ int AsmLexerScan(AsmToken **ptoken, AsmLexer *lexer)
   ///   '@data' would be a valid local name)
   ///
   ///   The token code for local names is ASM_TOKEN_LOCAL_NAME
+
+  if(first == '@')
+  {
+    return AsmScanLocalVariable(ptoken, lexer);
+  }
   ///
   ///
   /// * Special keywords starting with a "." followed by a non-empty sequence
@@ -323,6 +658,11 @@ int AsmLexerScan(AsmToken **ptoken, AsmLexer *lexer)
   ///   for special keywords (don't forget to pass the leading '.'). For valid
   ///   special keywords the lookup function will return an AsmKewordInfo structure
   ///   for invalid keywords NULL is returned.
+
+  if(first == '.')
+  {
+    return AsmScanKeyword(ptoken, lexer);
+  }
   ///
   /// * Decimal, hexadecimal and octal integers (token code: ASM_TOKEN_INT)
   ///   Any integer may start with a leading '-' sign.
@@ -342,6 +682,11 @@ int AsmLexerScan(AsmToken **ptoken, AsmLexer *lexer)
   ///   be implemented here)
   ///
   ///   The token code for integers is ASM_TOKEN_INT
+
+  if(isInteger(first))
+  {
+    return AsmScanInteger(first, ptoken, lexer);
+  }
   ///
   /// * Single character tokens
   ///   '[' - Left opening bracket (ASM_TOKEN_LBRACK)
@@ -350,6 +695,23 @@ int AsmLexerScan(AsmToken **ptoken, AsmLexer *lexer)
   ///   ')' - Right closing parenthesis (ASM_TOKEN_RPAREN)
   ///   ',' - Comma (ASM_TOKEN_COMMA)
   ///
+
+  switch(first)
+  {
+    case '[':
+      return AsmScanSingle(ASM_TOKEN_LBRACK, "[", ptoken, lexer);
+    case ']':
+      return AsmScanSingle(ASM_TOKEN_RBRACK, "]", ptoken, lexer);
+    case '(':
+      return AsmScanSingle(ASM_TOKEN_LPAREN, "(", ptoken, lexer);
+    case ')':
+      return AsmScanSingle(ASM_TOKEN_RPAREN, ")", ptoken, lexer);
+    case ',':
+      return AsmScanSingle(ASM_TOKEN_COMMA, ",", ptoken, lexer);
+    case ':':
+      return AsmScanSingle(ASM_TOKEN_DOUBLECOLON, ":", ptoken, lexer);
+  }
+
   return ASM_LEXER_ERROR;
 }
 

@@ -8,21 +8,69 @@
 bool VmStackPush(VmContext *vm, const uint32_t *values, size_t count)
 {
   /// \todo Implement your stack push operation
-  return false;
+	if(!vm){
+		return false;
+	}
+	if(count == 0){
+		return true;
+	}
+
+	size_t new_size = vm->stack_size + count;
+	//overflow check
+	if(SIZE_MAX - count < vm->stack_size || new_size>vm->max_stack){
+		return false;
+	}
+
+	uint32_t* start_p = vm->stack+vm->stack_size;
+	if(values){
+		//printf("values pointer %p\n", values);
+		for(size_t i = 0; i < count; i++)
+			start_p[i] = values[i];
+	}else{
+	    for(size_t i = 0; i < count; i++)
+			start_p[i] = 0;
+	}
+	vm->stack_size = new_size;
+	return true;
 }
 
 //----------------------------------------------------------------------
 bool VmStackPop(uint32_t *values, VmContext *vm, size_t count)
 {
   /// \todo Implement your stack push operation
-  return false;
+	if(!vm){
+		return false;
+	}
+
+	if(count > vm->stack_size){
+		return false;
+	}
+
+	if(count==0){
+		return true;
+	}
+
+	//copy values
+	uint32_t* start_p = vm->stack+vm->stack_size-1;
+	if(values){
+		for(size_t i=0;i < count;i++){
+			values[i] = *(start_p-i);
+		}
+	}
+
+	vm->stack_size = vm->stack_size-count;
+
+  return true;
 }
 
 //----------------------------------------------------------------------
 size_t VmStackGetUsage(VmContext *vm)
 {
   /// \todo Implement your stack usage function.
-  return 0;
+	if(!vm){
+		return 0;
+	}
+	return vm->stack_size;
 }
 
 //----------------------------------------------------------------------
@@ -30,7 +78,13 @@ uint32_t* VmStackAt(VmContext *vm, size_t index)
 {
   /// \todo Implement your stack "peek" function.
   ///  (note that index=0 is the bottom of the stack)
-  return NULL;
+	if(!vm){
+		return NULL;
+	}
+	if(index < vm->stack_size){
+		return (vm->stack+index);
+	}
+	return NULL;
 }
 
 
@@ -49,7 +103,7 @@ int VmBcImm32(VmContext *vm, uint32_t pc, uint32_t imm)
 int VmBcHandle(VmContext *vm, uint32_t pc, uint32_t imm)
 {
   // Sanity check: Are we loading a valid handle?
-  if (!VmGetObject(vm, imm)) {
+  if (imm != VM_NULL_HANDLE && !VmGetObject(vm, imm)) {
     VmLogError(vm, "bc: handle: refusing to load undefined handle 0x%08x",
                (unsigned) imm);
     return -1;
