@@ -6,7 +6,7 @@ The description for each assignment can be found in the respective "doc" folder.
 
 | Location      | Descritpion           | Programming language  |
 | ------------- | ------------- | ----- |
-| tasks/ws    | Web Application Security                         | Java, JavaScript, SQL   
+| tasks/ws    | Web Application Security  (find and exploit vulnerabilities in a given web application)                        | Java, JavaScript, SQL   
 | tasks/j   | Applied Cryptography and Public Key Infrastructure  | Java
 | tasks/c1  | BigInteger Library                                  | C
 | tasks/c2  | TinyVM                                              | C
