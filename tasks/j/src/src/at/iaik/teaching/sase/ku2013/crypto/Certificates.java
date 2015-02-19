@@ -256,6 +256,8 @@ public class Certificates {
     // to correlate the certificates. It may be advisable to first implement
     // the missing parts of checkUsageInChain below before working on cross
     // certification.
+    
+    //FIXME: this entire function must be refactored for better readability / maintainability!
 
     ArrayList<X509Certificate[]> chains = new ArrayList<X509Certificate[]>();
     // ----- BEGIN STUDENT CODE -----
